@@ -1,0 +1,82 @@
+@startuml
+
+ title <size:28>Real Time Origin-Destination Diagram\n <size:18> xdata@SIAT 2013-01-08 
+
+note left of realODMatrixTopology: start from here
+
+class realODMatrixTopology {
+	+void main(String[] args)
+}
+
+
+ realODMatrixTopology--> DistrictMatchingBolt: GPSDataLine >
+
+
+class DistrictMatchingBolt {
+	+void prepare(Map stormConf, TopologyContext context, OutputCollector collector)
+	+void execute(Tuple input)
+	+void cleanup()
+	+void declareOutputFields(OutputFieldsDeclarer declarer)
+	+Map<String,Object> getComponentConfiguration()
+}
+interface IRichBolt {
+}
+IRichBolt <|.. DistrictMatchingBolt
+
+
+
+DistrictMatchingBolt-> CountBolt:tuple >
+
+
+
+class CountBolt {
+	+void prepare(Map stormConf, TopologyContext context, OutputCollector collector)
+	+void execute(Tuple input)
+	+void cleanup()
+	+void declareOutputFields(OutputFieldsDeclarer declarer)
+	+Map<String,Object> getComponentConfiguration()
+}
+interface IRichBolt {
+}
+IRichBolt <|.. CountBolt
+
+
+
+CountBolt ->DBWritterBolt: tuple >
+
+
+
+class DBWritterBolt {
+	+void prepare(Map stormConf, TopologyContext context, OutputCollector collector)
+	+void execute(Tuple input)
+	+void cleanup()
+	+void declareOutputFields(OutputFieldsDeclarer declarer)
+	+Map<String,Object> getComponentConfiguration()
+}
+interface IRichBolt {
+}
+IRichBolt <|.. DBWritterBolt
+
+
+
+class TupleInfo {
+	-String viechleID
+	-String dateTime
+	-Double latitude
+	-Double longitude
+	-Integer speed
+	-Double melostone
+	-Integer bearing
+	-int numMember
+	+TupleInfo()
+	+TupleInfo(List<String> input)
+	+Fields getFieldList()
+	+String getDelimiter()
+}
+
+TupleInfo -- DistrictMatchingBolt
+
+
+
+
+@enduml
