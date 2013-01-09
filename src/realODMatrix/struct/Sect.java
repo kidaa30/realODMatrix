@@ -9,11 +9,12 @@ public class Sect extends Polygon {
 	 * @param args
 	 */
 	public Sect(ArrayList<Point> points,int id){
-		this.points = points;
+		super(points);
 		this.id = id;
 	}
 	
 	public int getID(){
 		return this.id;
 	}
+	
 }

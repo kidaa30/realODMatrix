@@ -14,9 +14,6 @@ public class Polygon {
 	public double ymax;
 	public int count;
 	
-	public Polygon(){
-		this.points = new ArrayList<Point>();
-	}
 	public Polygon(ArrayList<Point> points){
 		this.points = points;
 		this.count = points.size();
@@ -38,24 +35,56 @@ public class Polygon {
 	}
 	
 	public Boolean contains(Point p){
-		//
-		if(p.x>=xmax||p.x<=xmin||p.y>=ymax||p.y<=ymin)
+		
+		if(p.x>=xmax||p.x<xmin||p.y>=ymax||p.y<ymin)
 			return false;
 		
+		int cn = 0;
 		int n = points.size();
 		for (int i = 0; i < n - 1; i++) {
-			if(points.get(i).y!=points.get(i+1).y){//erase the condition of horizonal line
-					
+			if(points.get(i).y!=points.get(i+1).y&&!((p.y>points.get(i).y)&&(p.y>points.get(i+1).y))){//rule#3: erase the condition of horizonal line
+				double uy = 0;
+				double by = 0;
+				double ux = 0;
+				double bx = 0;
+				int dir = 0;
+				if(points.get(i).y>points.get(i+1).y){
+					uy = points.get(i).y;
+					by = points.get(i+1).y;
+					ux = points.get(i).x;
+					bx = points.get(i+1).x;
+					dir = 0;//downward
+				}else{
+					uy = points.get(i+1).y;
+					by = points.get(i).y;
+					ux = points.get(i+1).x;
+					bx = points.get(i).x;
+					dir = 1;//upward
+				}
+				
+				double tx = 0;
+				if(ux!=bx){
+					double k = (uy-by)/(ux-bx);
+					double b = ((uy-k*ux)+(by-k*bx))/2;
+					tx = (p.y-b)/k;
+				}else
+					tx = ux;
+				
+				if(tx>p.x){//rule#4: the insect point should locate the right side of p
+					if(dir==1&&p.y!=points.get(i+1).y)//rule#1: upward do not count the last point
+						cn++;
+					else if(p.y!=points.get(i).y)//rule#2: downward do not count the first point
+						cn++;
+				}
 			}
 		}
 		
-		
-		int cn = 0 ; //the crossing number counter
-		
-		
-		
-		return false;
+		if(cn%2==0)
+			return false;
+		else
+			return true;
 	}
+	
 	
 	
 	

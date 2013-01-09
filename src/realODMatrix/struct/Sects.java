@@ -17,9 +17,7 @@ import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.postgis.LineString;
 import org.postgis.LinearRing;
-import org.postgis.MultiLineString;
 import org.postgis.MultiPolygon;
 
 public class Sects {
@@ -80,6 +78,12 @@ public class Sects {
 	public int fetchSect(Point p){
 		int sectID = -1;
 		for (Sect sect : this.sects) {
+			if(sect.getID()==75){
+				for (Point pt  : sect.points) {
+					System.out.println(pt.x+","+pt.y);
+				}
+				sectID = -1;
+			}
 			if(sect.contains(p))
 				return sect.getID();
 		}
@@ -87,9 +91,45 @@ public class Sects {
 	}
 	
 	public static void main(String[] args) throws SQLException, IOException {
-		// TODO Auto-generated method stub
+		
+		//Initializations
 		String path = "E:/datasource/sztb/dat/base/sects/Sects.shp";
 		Sects sects = new Sects(path);
+		GPSRcrd record = new GPSRcrd(118716,32110,100,100);
+		
+		//Fetching id by Point location
+		int id = sects.fetchSect(record);
+		System.out.println(id);
+		if(id==-1)
+			System.out.println("no sects contain this record");
+		
+		
+		//Extra
+		//Showing the geometric relationship
+		Point p1 = new Point(0,0);
+		Point p2 = new Point(1,0);
+		Point p3 = new Point(1,1);
+		Point p4 = new Point(0,1);
+		Point tp1 = new Point(0.5,0.5);//inside
+		Point tp2 = new Point(-10,0.5);//outside
+		Point tp3 = new Point(1,0.5);//on the right edge
+		Point tp4 = new Point(0,0.5);//on the left edge
+		Point tp5 = new Point(0.5,1);//on the upper edge
+		Point tp6 = new Point(0.5,0);//on the bottom edge
+		ArrayList<Point> ps = new ArrayList<Point>();
+		ps.add(p1);
+		ps.add(p2);
+		ps.add(p3);
+		ps.add(p4);
+		ps.add(p1);
+		Polygon pg = new Polygon(ps);
+		System.out.println("包含："+pg.contains(tp1));
+		System.out.println("相离："+pg.contains(tp2));
+		System.out.println("右边界相交："+pg.contains(tp3));
+		System.out.println("左边界相交："+pg.contains(tp4));
+		System.out.println("上边界相交："+pg.contains(tp5));
+		System.out.println("下边界相交："+pg.contains(tp6));
+		
 		
 		return;
 	}
