@@ -42,7 +42,7 @@ public class Polygon {
 		int cn = 0;
 		int n = points.size();
 		for (int i = 0; i < n - 1; i++) {
-			if(points.get(i).y!=points.get(i+1).y&&!((p.y>points.get(i).y)&&(p.y>points.get(i+1).y))){//rule#3: erase the condition of horizonal line
+			if(points.get(i).y!=points.get(i+1).y&&!((p.y<points.get(i).y)&&(p.y<points.get(i+1).y))&&!((p.y>points.get(i).y)&&(p.y>points.get(i+1).y))){//rule#3: erase the condition of horizonal line
 				double uy = 0;
 				double by = 0;
 				double ux = 0;
@@ -78,7 +78,6 @@ public class Polygon {
 				}
 			}
 		}
-		
 		if(cn%2==0)
 			return false;
 		else

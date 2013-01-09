@@ -78,14 +78,9 @@ public class Sects {
 	public int fetchSect(Point p){
 		int sectID = -1;
 		for (Sect sect : this.sects) {
-			if(sect.getID()==75){
-				for (Point pt  : sect.points) {
-					System.out.println(pt.x+","+pt.y);
-				}
-				sectID = -1;
-			}
-			if(sect.contains(p))
+			if(sect.contains(p)){
 				return sect.getID();
+			}
 		}
 		return sectID;
 	}
@@ -99,10 +94,10 @@ public class Sects {
 		
 		//Fetching id by Point location
 		int id = sects.fetchSect(record);
-		System.out.println(id);
 		if(id==-1)
 			System.out.println("no sects contain this record");
-		
+		else
+			System.out.println("GPS Point falls into Sect No." + id);
 		
 		//Extra
 		//Showing the geometric relationship

@@ -170,9 +170,5 @@
 	<classpathentry kind="lib" path="lib/geotools-8.5/ui.workbench-3.6.1.M20100826-1330.jar"/>
 	<classpathentry kind="lib" path="lib/geotools-8.5/vecmath-1.3.2.jar"/>
 	<classpathentry kind="lib" path="lib/geotools-8.5/xercesImpl-2.7.1.jar"/>
-	<classpathentry kind="lib" path="lib/geotools-8.5/xml-apis-xerces-2.7.1.jar"/>
-	<classpathentry kind="lib" path="lib/geotools-8.5/xml-commons-resolver-1.2.jar"/>
-	<classpathentry kind="lib" path="lib/geotools-8.5/xpp3_min-1.1.4c.jar"/>
-	<classpathentry kind="lib" path="lib/geotools-8.5/xsd-2.6.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
