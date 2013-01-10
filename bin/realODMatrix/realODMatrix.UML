@@ -9,27 +9,7 @@ class realODMatrixTopology {
 }
 
 
- realODMatrixTopology--> FieldListenerSpout: GPSDataLine >
- 
- class FieldListenerSpout {
-	-long serialVersionUID
-	-SpoutOutputCollector _collector
-	-BufferedReader fileReader
-	-Random _rand
-	-TopologyContext context
-	-String file
-	-TupleInfo tupleInfo
-	+void open(Map conf, TopologyContext context, SpoutOutputCollector collector)
-	+void nextTuple()
-	+void ack(Object id)
-	+void fail(Object id)
-	+void declareOutputFields(OutputFieldsDeclarer declarer)
-}
-abstract class BaseRichSpout {
-}
-BaseRichSpout <|-- FieldListenerSpout
-
- FieldListenerSpout--> DistrictMatchingBolt: tuple >
+ realODMatrixTopology--> DistrictMatchingBolt: GPSDataLine >
 
 
 class DistrictMatchingBolt {
@@ -62,7 +42,9 @@ IRichBolt <|.. CountBolt
 
 
 
-DBWritterBolt <-- CountBolt: tuple <
+CountBolt ->DBWritterBolt: tuple >
+
+
 
 class DBWritterBolt {
 	+void prepare(Map stormConf, TopologyContext context, OutputCollector collector)
@@ -75,9 +57,7 @@ interface IRichBolt {
 }
 IRichBolt <|.. DBWritterBolt
 
-class  WebsiteFrontEnd
 
-WebsiteFrontEnd <-- DBWritterBolt
 
 class TupleInfo {
 	-String viechleID
