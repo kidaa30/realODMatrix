@@ -1,15 +1,10 @@
 package realODMatrix.spout;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import backtype.storm.tuple.Fields;
-import backtype.storm.tuple.Tuple;
 
 public class TupleInfo {
-	
 	private String viechleID;
 	private String dateTime;
 	private Double latitude;
@@ -26,7 +21,7 @@ public class TupleInfo {
 	
 	public TupleInfo(List<String> input){
 		int lstLength=input.size();
-		if(numMember!=input.size())
+		if(numMember!=lstLength)
 			System.out.print("input list size mismatch");// ("input list size mismatch");
 		else 
 		{
@@ -55,8 +50,7 @@ public class TupleInfo {
 		fieldList[3]=Double.toString(longitude) ;
 		fieldList[4]=Integer.toString(speed) ;
 		fieldList[5]=Double.toString(melostone);
-		fieldList[6]=Integer.toString(bearing);
-		
+		fieldList[6]=Integer.toString(bearing);		
 		return fieldList;
 	}*/
 	
