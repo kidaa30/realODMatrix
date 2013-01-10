@@ -7,11 +7,12 @@ import backtype.storm.tuple.Fields;
 public class TupleInfo {
 	private String viechleID;
 	private String dateTime;
+	private Integer occupied;
+	private Integer speed;
+	private Integer bearing;
 	private Double latitude;
 	private Double longitude;
-	private Integer speed;
-	private Double melostone;
-	private Integer bearing;
+
 	private int numMember=7;
 	
 	
@@ -57,9 +58,9 @@ public class TupleInfo {
 	
 	public Fields getFieldList() {		
 		//Fields fieldList= new Fields(viechleID,dateTime,latitude,longitude,speed,melostone,bearing);
-		Fields fieldList= new Fields (viechleID,dateTime,Double.toString(latitude),
-				Double.toString(longitude),Integer.toString(speed),Double.toString(melostone),
-				Integer.toString(bearing));		
+		Fields fieldList= new Fields (viechleID,dateTime,Integer.toString(occupied),
+				Integer.toString(speed),Integer.toString(bearing),Double.toString(latitude),
+				Double.toString(longitude));		
 		return fieldList;
 	}
 
@@ -68,7 +69,8 @@ public class TupleInfo {
 
 	public String getDelimiter() {
 		// TODO Auto-generated method stub
-		String delimiter="|";
+		//String delimiter="|";
+		String delimiter=",";
 		return delimiter;
 	
 	}
