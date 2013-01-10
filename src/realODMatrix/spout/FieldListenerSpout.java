@@ -18,8 +18,10 @@ import java.io.RandomAccessFile;
 import java.util.Map;
 import java.util.Random;
 
+
 public class FieldListenerSpout extends BaseRichSpout {
-    private SpoutOutputCollector _collector;
+    private static final long serialVersionUID = 1L;
+	private SpoutOutputCollector _collector;
     private BufferedReader fileReader;
     private Random _rand;   
     private TopologyContext context;
@@ -46,8 +48,7 @@ public class FieldListenerSpout extends BaseRichSpout {
     }
 
     @Override
-    public void nextTuple() {
-    	
+    public void nextTuple() {    	
    
         Utils.sleep(2000);
        // RandomAccessFile access = null; 
@@ -72,18 +73,19 @@ public class FieldListenerSpout extends BaseRichSpout {
                } 
           } 
           catch (IOException ex) { }               
-        //}
-    
-    
+        //}    
     }        
 
     @Override
     public void ack(Object id) {
+    	System.out.println("OK:"+id);
+    }
     }
 
     @Override
     public void fail(Object id) {
-    }
+    	System.out.println("Fail:"+id);
+    }    
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
