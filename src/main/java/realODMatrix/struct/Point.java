@@ -1,7 +1,7 @@
 /**
  * 
  */
-package realODMatrix.struct;
+package main.java.realODMatrix.struct;
 
 
 /**

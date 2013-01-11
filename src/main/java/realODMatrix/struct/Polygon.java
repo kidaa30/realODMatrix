@@ -1,4 +1,4 @@
-package realODMatrix.struct;
+package main.java.realODMatrix.struct;
 
 import java.util.ArrayList;
 

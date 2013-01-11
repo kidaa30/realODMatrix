@@ -18,6 +18,7 @@ import backtype.storm.generated.InvalidTopologyException;
 import backtype.storm.generated.StormTopology;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.TopologyBuilder;
+import main.java.realODMatrix.bolt.DistrictMatchingBolt;
 //import main.java.realODMatrix.bolt.CountBolt;
 //import main.java.realODMatrix.bolt.DBWritterBolt;
 //import main.java.realODMatrix.bolt.DistrictMatchingBolt;
@@ -40,7 +41,7 @@ public class realODMatrixTopology  {
 		
 		FieldListenerSpout fieldListenerSpout = new FieldListenerSpout();
 		
-//		DistrictMatchingBolt districtMacthingBolt=new DistrictMatchingBolt(); 
+		DistrictMatchingBolt districtMacthingBolt=new DistrictMatchingBolt(); 
 //		CountBolt countBolt =new CountBolt();
 //		DBWritterBolt dbWriterBolt = new DBWritterBolt();	
 		
@@ -48,7 +49,8 @@ public class realODMatrixTopology  {
 	        TopologyBuilder builder = new TopologyBuilder();
 	        
 	        builder.setSpout("spout", fieldListenerSpout);//,2);	        
-//	        builder.setBolt("matchingBolt", districtMacthingBolt,2).shuffleGrouping("spout");
+	        builder.setBolt("matchingBolt", districtMacthingBolt).shuffleGrouping("spout");
+	        
 //	        builder.setBolt("countBolt",countBolt,2).shuffleGrouping("matchingBolt"); 
 //	        builder.setBolt("dbBolt",dbWriterBolt,2).shuffleGrouping("countBolt");
 
@@ -56,7 +58,9 @@ public class realODMatrixTopology  {
 		    Config conf = new Config();
 	        if(args!=null && args.length > 0) {
 	            conf.setNumWorkers(3);            
-	            StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
+	            //StormSubmitter.
+	            LocalCluster  cluster= new LocalCluster();
+	            cluster.submitTopology(args[0], conf, builder.createTopology());
 	        } 
 	        else {     
 	              

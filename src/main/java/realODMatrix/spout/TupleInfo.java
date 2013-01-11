@@ -1,10 +1,16 @@
 package main.java.realODMatrix.spout;
 
-import java.util.List;
+import java.io.IOException;
+import java.io.Serializable;
+import java.sql.SQLException;
+//import java.util.List;
 
 import backtype.storm.tuple.Fields;
+//import main.java.realODMatrix.spout.*;
 
-public class TupleInfo {
+
+public class TupleInfo implements Serializable{
+	private static final long serialVersionUID = 8524559685781732841L;
 	private String viechleID;
 	private String dateTime;
 	private Integer occupied;
@@ -16,16 +22,19 @@ public class TupleInfo {
 	private int numMember=7;
 	
 	
-	public TupleInfo(){
+	public TupleInfo() {
+		 viechleID="";	
+		 dateTime="";
+		 occupied=0;
+		 speed=0;
+		 bearing=0;			 
+		 latitude=0.0;
+		 longitude=0.0;
 		
 	}
 	
-	public TupleInfo(String[] input){
-		//int lstLength=input.length;
-		if(numMember!=input.length)
-			System.out.print("input list size mismatch");// ("input list size mismatch");
-		else 
-		{
+	public TupleInfo(String[] input) {
+		
 			 viechleID=input[0];	
 			 dateTime=input[1];
 			 occupied=Integer.parseInt(input[2]);
@@ -33,34 +42,19 @@ public class TupleInfo {
 			 bearing=Integer.parseInt(input[4]);			 
 			 latitude=Double.parseDouble(input[5]);
 			 longitude=Double.parseDouble(input[6]);				 
-		}
+		
 	}
 	
 
 
-/*	public String[] getFieldList() {
-		// TODO Auto-generated method stub
-		//Fields fieldList= new Fields(viechleID,dateTime,latitude,longitude,speed,melostone,bearing);
-		String[] fieldList= new String[numMember];
-
-		
-			
-		fieldList[0]=viechleID;
-		fieldList[1]=dateTime;
-		fieldList[2]=Double.toString(latitude) ;
-		fieldList[3]=Double.toString(longitude) ;
-		fieldList[4]=Integer.toString(speed) ;
-		fieldList[5]=Double.toString(melostone);
-		fieldList[6]=Integer.toString(bearing);		
-		return fieldList;
-	}*/
+	public int getTupleLength() {	
+		return numMember;
+	}
 	
 	
 	public Fields getFieldList() {		
-		//Fields fieldList= new Fields(viechleID,dateTime,latitude,longitude,speed,melostone,bearing);
-		Fields fieldList= new Fields (viechleID,dateTime,Integer.toString(occupied),
-				Integer.toString(speed),Integer.toString(bearing),Double.toString(latitude),
-				Double.toString(longitude));		
+		Fields fieldList= new Fields ("viechleID","dateTime","occupied",
+				"speed","bearing","latitude","longitude");		
 		return fieldList;
 	}
 
@@ -69,11 +63,8 @@ public class TupleInfo {
 
 	public String getDelimiter() {
 		// TODO Auto-generated method stub
-		//String delimiter="|";
 		String delimiter=",";
 		return delimiter;
 	
 	}
-
-
 }
