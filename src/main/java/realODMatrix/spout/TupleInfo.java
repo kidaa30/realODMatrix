@@ -1,4 +1,4 @@
-package realODMatrix.spout;
+package main.java.realODMatrix.spout;
 
 import java.util.List;
 
@@ -20,19 +20,19 @@ public class TupleInfo {
 		
 	}
 	
-	public TupleInfo(List<String> input){
-		int lstLength=input.size();
-		if(numMember!=lstLength)
+	public TupleInfo(String[] input){
+		//int lstLength=input.length;
+		if(numMember!=input.length)
 			System.out.print("input list size mismatch");// ("input list size mismatch");
 		else 
 		{
-			 viechleID=input.get(0);	
-			 dateTime=input.get(1);
-			 latitude=Double.parseDouble(input.get(2));
-			 longitude=Double.parseDouble(input.get(3));
-			 speed=Integer.parseInt(input.get(4));
-			 melostone=Double.parseDouble(input.get(5));
-			 bearing=Integer.parseInt(input.get(6));			
+			 viechleID=input[0];	
+			 dateTime=input[1];
+			 occupied=Integer.parseInt(input[2]);
+			 speed=Integer.parseInt(input[3]);
+			 bearing=Integer.parseInt(input[4]);			 
+			 latitude=Double.parseDouble(input[5]);
+			 longitude=Double.parseDouble(input[6]);				 
 		}
 	}
 	

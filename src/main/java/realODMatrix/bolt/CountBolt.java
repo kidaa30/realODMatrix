@@ -1,29 +1,29 @@
 /**
- * realODMatrix realODMatrix.bolt DBWritter.java
+ * realODMatrix realODMatrix.bolt CountBolt.java
  *
  * Copyright 2013 Xdata@SIAT
- * Created:2013-1-8 обнГ4:32:35
+ * Created:2013-1-8 О©╫О©╫О©╫О©╫2:45:05
  * email: gh.chen@siat.ac.cn
  */
-package realODMatrix.bolt;
+package main.java.realODMatrix.bolt;
 
 import java.util.Map;
-
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.IRichBolt;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Tuple;
 
+
 /**
- * realODMatrix realODMatrix.bolt DBWritter.java
+ * realODMatrix realODMatrix.bolt CountBolt.java
  *
  * Copyright 2013 Xdata@SIAT
- * Created:2013-1-8 обнГ4:32:35
+ * Created:2013-1-8 2:45:05
  * email: gh.chen@siat.ac.cn
  *
  */
-public class DBWritterBolt implements IRichBolt {
+public class CountBolt implements IRichBolt {
 
 	
 	@Override
@@ -60,6 +60,5 @@ public class DBWritterBolt implements IRichBolt {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
 
 }

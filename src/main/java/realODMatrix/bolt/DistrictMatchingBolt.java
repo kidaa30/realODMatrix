@@ -3,10 +3,10 @@
  *
  * Copyright 2013 Xdata@SIAT
  * Author: admin
- * Last Updated:2013-1-8 обнГ2:39:14
+ * Last Updated:2013-1-8 О©╫О©╫О©╫О©╫2:39:14
  * email: gh.chen@siat.ac.cn
  */
-package realODMatrix.bolt;
+package main.java.realODMatrix.bolt;
 
 import java.util.Map;
 
@@ -20,7 +20,7 @@ import backtype.storm.tuple.Tuple;
  * realODMatrix realODMatrix.bolt DistrictMatchingBolt.java
  *
  * Copyright 2013 Xdata@SIAT
- * Created:2013-1-8 обнГ2:39:14
+ * Created:2013-1-8 2:39:14
  * email: gh.chen@siat.ac.cn 
  */
 public class DistrictMatchingBolt implements IRichBolt {
