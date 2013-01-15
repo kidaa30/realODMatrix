@@ -1,0 +1,44 @@
+<TUPLEINFO>
+              <FIELDLIST>
+                  <FIELD>
+                            <COLUMNNAME>vehicle_number</COLUMNNAME> 
+                            <COLUMNTYPE>string</COLUMNTYPE> 
+                  </FIELD>
+                            
+                  <FIELD>
+                            <COLUMNNAME>date_time</COLUMNNAME> 
+                            <COLUMNTYPE>string</COLUMNTYPE> 
+                  </FIELD>
+                  
+                  <FIELD>
+                            <COLUMNNAME>occupied</COLUMNNAME> 
+                            <COLUMNTYPE>bool</COLUMNTYPE>                             
+                  </FIELD>
+                  
+                  
+		  						<FIELD>
+                            <COLUMNNAME>speed</COLUMNNAME> 
+                            <COLUMNTYPE>int</COLUMNTYPE> 
+                  </FIELD>
+                  
+                  <FIELD>
+                             <COLUMNNAME>bearing</COLUMNNAME> 
+                             <COLUMNTYPE>int</COLUMNTYPE> 
+                  </FIELD>                  
+
+                            
+                  <FIELD>
+                            <COLUMNNAME>latitude</COLUMNNAME>     
+                            <COLUMNTYPE>double</COLUMNTYPE>
+                  </FIELD>
+
+                            
+                  <FIELD>
+                            <COLUMNNAME>longitude</COLUMNNAME>     
+                            <COLUMNTYPE>double</COLUMNTYPE>
+                  </FIELD>
+                  
+              </FIELDLIST>  
+           <DELIMITER>,</DELIMITER> 
+</TUPLEINFO>
+

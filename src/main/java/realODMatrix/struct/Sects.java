@@ -2,7 +2,7 @@ package main.java.realODMatrix.struct;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
+//import java.net.MalformedURLException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -88,9 +88,15 @@ public class Sects {
 	public static void main(String[] args) throws SQLException, IOException {
 		
 		//Initializations
-		String path = "E:/datasource/sztb/dat/base/sects/Sects.shp";
+		//String path = "E:/datasource/sztb/dat/base/sects/Sects.shp";
+		String path = "D:\\shenzhen GIS\\交通小区划分\\交通小区划分\\sects\\Sects.shp";
 		Sects sects = new Sects(path);
 		GPSRcrd record = new GPSRcrd(118716,32110,100,100);
+		
+		GPSRcrd record2 = new GPSRcrd(113.874794,22.558666,100,100);
+		int id2 = sects.fetchSect(record2);
+		System.out.println("GPSrecord2 113.874794,22.558666 falls into :"+id2);
+		
 		
 		//Fetching id by Point location
 		int id = sects.fetchSect(record);
