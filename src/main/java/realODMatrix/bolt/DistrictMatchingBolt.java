@@ -48,6 +48,7 @@ public class DistrictMatchingBolt implements IRichBolt {
 	Map<GPSRcrd, Integer> gpsMatch;  //map<GPSRcrd,districtID>
 	Integer taskID;
 	String name;
+	List<Object> inputLine; 
 	
 
 
@@ -71,8 +72,8 @@ public class DistrictMatchingBolt implements IRichBolt {
 		Sects sects;
 		try {
 			sects = new Sects(path);
-			
-	      FileWriter gpsDatafile= new FileWriter("/home/ghchen/tuple");
+//--------------------
+	      FileWriter gpsDatafile= new FileWriter("/home/ghchen/tuple",true);
           BufferedWriter writer= new BufferedWriter(gpsDatafile);
           
           writer.write(input.toString());   
@@ -81,15 +82,7 @@ public class DistrictMatchingBolt implements IRichBolt {
 			
 		  List<Object> inputLine = input.getValues();//getFields();
 
-//			for (int i=0;i<inputLine.size();i++)System.out.println(inputLine);
-//			
-//			System.out.println("LONG:"+inputLine.get(6));
-//			System.out.println("LANT:"+inputLine.get(5));
-//			System.out.println("SPEED:"+inputLine.get(3));
-//			System.out.println("Bearing:"+inputLine.get(4));
-			
-
-				record=new GPSRcrd(Double.parseDouble((String) inputLine.get(6)), 
+			record=new GPSRcrd(Double.parseDouble((String) inputLine.get(6)), 
 					Double.parseDouble((String) inputLine.get(5)), Integer.parseInt((String) inputLine.get(3)), 
 					Integer.parseInt((String) inputLine.get(4)));
 
@@ -101,21 +94,34 @@ public class DistrictMatchingBolt implements IRichBolt {
 			else
 			{
 				System.out.println("GPS Point falls into Sect No. :" + districtID);
-				//gpsMatch.put(record, 1);
+	
+//----------------------------------------------------------------				
+				try {
+					gpsDatafile = new FileWriter("/home/ghchen/districtID",true);
+				      BufferedWriter writer2= new BufferedWriter(gpsDatafile);
+				      
+				      	writer2.write("GPS Point falls into Sect No. :" + districtID);
+
+				      writer2.write("\n");
+				      writer2.close(); 
+						
+				} catch (IOException e1) {
+
+					e1.printStackTrace();
+				}
+				
+				
 			}
 			
 			inputLine.add(Integer.toString(districtID));
 			_collector.emit(new Values(inputLine));			
-		
-		//} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			//e.printStackTrace();
+
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 			throw new RuntimeException("Error reading tuple",e);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 		}	
 		
@@ -140,7 +146,7 @@ public class DistrictMatchingBolt implements IRichBolt {
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
 		// TODO Auto-generated method stub	
 		
-				
+		declarer.declare(new Fields ("inputLine"));				
 		
 	}
 

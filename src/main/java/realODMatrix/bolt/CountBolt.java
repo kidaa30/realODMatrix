@@ -2,7 +2,7 @@
  * realODMatrix realODMatrix.bolt CountBolt.java
  *
  * Copyright 2013 Xdata@SIAT
- * Created:2013-1-8 ����2:45:05
+ * Created:2013-1-8 锟斤拷锟斤拷2:45:05
  * email: gh.chen@siat.ac.cn
  */
 package main.java.realODMatrix.bolt;
@@ -22,6 +22,7 @@ import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.IRichBolt;
 import backtype.storm.topology.OutputFieldsDeclarer;
+import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
 import backtype.storm.utils.Time;
@@ -52,7 +53,6 @@ public class CountBolt implements IRichBolt {
 	Integer taskId;
 	String taskName;
 	Map<String, List<String> > districts;
-	List<String> gpsLineList=null;  // List one sequence of data: count,time,vehicleIdsInThisArea
 	List<String> vehicleIdsInThisArea; 
 	Integer cnt;
 	
@@ -67,11 +67,31 @@ public class CountBolt implements IRichBolt {
 	}
 
 	
+	@SuppressWarnings("null")
 	@Override
 	public void execute(Tuple input) {
-		// TODO Auto-generated method stub
+		
+		
+      FileWriter gpsDatafile;
+	try {
+		gpsDatafile = new FileWriter("/home/ghchen/countInput",true);
+	      BufferedWriter writer= new BufferedWriter(gpsDatafile);
+	      
+	      	writer.write(input.toString());
 
-		String districtID = (String) input.getValues().get(7);
+	      writer.write("\n");
+	      writer.close(); 
+			
+	} catch (IOException e1) {
+		// TODO Auto-generated catch block
+		e1.printStackTrace();
+	}
+
+		// TODO Auto-generated method stub
+		List<String> gpsLineList=null;  // List one sequence of data: count,time,vehicleIdsInThisArea
+        int sizeofGPSLine=input.size();
+		String districtID =  input.getValues().get(input.size()-1).toString();
+
 		
 		double lan= (Double)input.getValues().get(5);
 		double lon= (Double)input.getValues().get(6);
@@ -88,42 +108,71 @@ public class CountBolt implements IRichBolt {
 			System.out.println("CountBolt Error: can't assign value of Index [1] in input tuple !");
 		}  	
 
-		// to Seconds; 这个的除以1000得到秒，相应的60000得到分，3600000得到小时		
+		// to Seconds; 		
 		double dist=Math.sqrt(Math.pow(lan-lanLast,2)+Math.pow(lon-lonLast,2));	
 			
 	    
 		/** If the word dosn't exist in the map we will create
-		 * this, if not We will creat a new thread and  add 1 
-		 */		
+		 * this, if not We will creat a new thread and  add 1 */		
 		if(dist>DIST0 && interval>INTERVAL0){
 			if(districts.containsKey(districtID)){
-			cnt =Integer.parseInt(districts.get(districtID).get(1)) + 1;
-			vehicleIdsInThisArea.add((String) input.getValues().get(1));
-			
-			gpsLineList.add(districtID);
-			gpsLineList.add(cnt.toString());
-			gpsLineList.add(input.getValues().get(1).toString());	// get Time stamp from input		
-			
-			districts.put(districtID, gpsLineList);			
+				cnt =Integer.parseInt(districts.get(districtID).get(1)) + 1;
+				vehicleIdsInThisArea.add((String) input.getValues().get(1));
+
+				gpsLineList.add(districtID);
+				gpsLineList.add(cnt.toString());
+				gpsLineList.add(input.getValues().get(1).toString());	// get Time stamp from input	
+				gpsLineList.addAll(vehicleIdsInThisArea);  
+
+				districts.put(districtID, gpsLineList);	
+
 			}
 			else{
-				
-				lanLast = lan;
-				lonLast = lon;
-				
+				cnt=1;
 				vehicleIdsInThisArea.add((String) input.getValues().get(1));
 				
+				gpsLineList.add(districtID);
+				gpsLineList.add(cnt.toString());
+				gpsLineList.add(input.getValues().get(1).toString());	// get Time stamp from input	
+				gpsLineList.addAll(vehicleIdsInThisArea);  				
+				
 				districts.put(districtID, gpsLineList);
-				}
-			    //_collector.emit(new Values(districts));	
 			}
+			
+//---------------------------------------------			
+			try {
+				gpsDatafile = new FileWriter("/home/ghchen/districts");
+			      BufferedWriter writer= new BufferedWriter(gpsDatafile);
+			      
+			      	writer.write(districts.toString());
+
+			      writer.write("\n");
+			      writer.close(); 
+					
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}	
+			
+    		lanLast = lan;
+			lonLast = lon;
+			try {
+				dateTimeLast=sdf.parse( (String)input.getValues().get(1));
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		_collector.emit(new Values(districts));
+
+		}
+
 		
 		Date nowtime=new Date();
 		int  timeMinute= nowtime.getMinutes();	
 		
-		/* Every ten minute, we reset the list to null;
-		 * */		
+		/* Every ten minute, we reset the list to null;	 * */		
 		if(0==(timeMinute%10)){   //every 10 minutes
+//----------------------------------------------------------------------			
 			FileWriter fwriter;
 			try {
 				fwriter = new FileWriter("/home/ghchen/vehiclesInDistrict");
@@ -157,7 +206,7 @@ public class CountBolt implements IRichBolt {
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
 		// TODO Auto-generated method stub
-		
+		declarer.declare(new Fields("districts"));
 	}
 
 	
