@@ -158,19 +158,4 @@ public class FieldListenerSpout implements IRichSpout {
 
 
     
-/*    public static void main(String[] args) {    	
-    	FieldListenerSpout field = new FieldListenerSpout();
-    	OutputFieldsDeclarer declarer;
-    	Map conf = new HashMap();
-    	conf.put(Config.TOPOLOGY_WORKERS, 4);
-    	TopologyContext context;
-    	SpoutOutputCollector collector;    	
-    	
-    	field.open(conf,context,collector);
-    	field.nextTuple();    
-		field.declareOutputFields(declarer);  
-				
-	}*/
-
-    
 }

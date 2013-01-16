@@ -8,12 +8,7 @@
  */
 package main.java.realODMatrix.bolt;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -49,7 +44,7 @@ public class DistrictMatchingBolt implements IRichBolt {
 	GPSRcrd record;
 	Map<GPSRcrd, Integer> gpsMatch;  //map<GPSRcrd,districtID>
 	Integer taskID;
-	String name;
+	String taskname;
 	List<Object> inputLine; 
 	Fields matchBoltDeclare=null;
 	
@@ -62,7 +57,7 @@ public class DistrictMatchingBolt implements IRichBolt {
 		// TODO Auto-generated method stub
 		this._collector=collector;	
 		this.taskID=context.getThisTaskId();
-		this.name=context.getThisComponentId();
+		this.taskname=context.getThisComponentId();
 		
 	}
 
@@ -75,12 +70,12 @@ public class DistrictMatchingBolt implements IRichBolt {
 		Sects sects;
 		try {
 			sects = new Sects(path);
-			FieldListenerSpout.writeToFile("/home/ghchen/output","District Match input:"+input.toString());
+			//FieldListenerSpout.writeToFile("/home/ghchen/output","District Match input:"+input.toString());
  
 			
 		  List<Object> inputLine = input.getValues();//getFields();
 		  Fields inputLineFields = input.getFields();
-	FieldListenerSpout.writeToFile("/home/ghchen/output","DistrictMap inputLineFields"+inputLineFields);	  
+	//FieldListenerSpout.writeToFile("/home/ghchen/output","DistrictMap inputLineFields"+inputLineFields);	  
 		  
 
 			record=new GPSRcrd(Double.parseDouble((String) inputLine.get(6)), 
@@ -100,15 +95,19 @@ public class DistrictMatchingBolt implements IRichBolt {
 				
 			}
 			
-			inputLine.add(Integer.toString(districtID));
-			//input.
-			//input.add((Object)districtID);
+			inputLine.add(Integer.toString(districtID));			
+			//input.getFields().toList().add("districtID");
+			List<String> fieldList= input.getFields().toList();
+			fieldList.add("districtID");
+			matchBoltDeclare=new Fields(fieldList);
+			//FieldListenerSpout.writeToFile("/home/ghchen/output","matchBoltDeclare="+matchBoltDeclare);		
+
 			
-			String[] obToStrings =null;
-			for (int i=0;i<inputLine.size();i++) obToStrings[i]=inputLine.get(i).toString();
+			String[] obToStrings=new String[inputLine.size()];
+			obToStrings=inputLine.toArray(obToStrings);
 			
-//			matchBoltDeclare =new Fields(obToStrings);
-			  _collector.emit(new Values(obToStrings));
+
+			_collector.emit(new Values(obToStrings));
 			//_collector.emit(new Values(inputLine));			
 
 		} catch (IOException e) {
@@ -129,7 +128,7 @@ public class DistrictMatchingBolt implements IRichBolt {
 	public void cleanup() {
 		// TODO Auto-generated method stub
 		
-		System.out.println("-- District Mathchier ["+name+"-"+districtID+"] --");
+		System.out.println("-- District Mathchier ["+taskname+"-"+districtID+"] --");
 		//for(Map.Entry<GPSRcrd, Integer> entry : gpsMatch.entrySet()){
 		//System.out.println(entry.getKey()+": "+entry.getValue());
 		//}
@@ -139,11 +138,8 @@ public class DistrictMatchingBolt implements IRichBolt {
 	
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		// TODO Auto-generated method stub	
-        
-		//declarer.declare(matchBoltDeclare);
-		declarer.declare(new Fields ("matchedGPS"));				
-		
+		declarer.declare(new Fields ("viechleID", "dateTime", "occupied", "speed", 
+				"bearing", "latitude", "longitude", "districtID"));				
 	}
 
 	
