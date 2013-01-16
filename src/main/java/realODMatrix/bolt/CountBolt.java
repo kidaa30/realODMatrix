@@ -31,6 +31,9 @@ import java.util.List;
 
 import javax.measure.quantity.Power;
 
+import main.java.realODMatrix.spout.FieldListenerSpout;
+import main.java.realODMatrix.spout.TupleInfo;
+
 
 /**
  * realODMatrix realODMatrix.bolt CountBolt.java
@@ -71,51 +74,49 @@ public class CountBolt implements IRichBolt {
 	@Override
 	public void execute(Tuple input) {
 		
-		
-      FileWriter gpsDatafile;
-	try {
-		gpsDatafile = new FileWriter("/home/ghchen/countInput",true);
-	      BufferedWriter writer= new BufferedWriter(gpsDatafile);
-	      
-	      	writer.write(input.toString());
+	     FieldListenerSpout.writeToFile("/home/ghchen/output","CountBolt input:"+input.toString());
 
-	      writer.write("\n");
-	      writer.close(); 
-			
-	} catch (IOException e1) {
-		// TODO Auto-generated catch block
-		e1.printStackTrace();
-	}
-
-		// TODO Auto-generated method stub
 		List<String> gpsLineList=null;  // List one sequence of data: count,time,vehicleIdsInThisArea
         int sizeofGPSLine=input.size();
-		String districtID =  input.getValues().get(input.size()-1).toString();
-
-		
-		double lan= (Double)input.getValues().get(5);
-		double lon= (Double)input.getValues().get(6);
+        
+        //Object[] 
+        List<Object>		countInput=input.getValues();
+        String  [] countBoltInput =countInput.toString().split(TupleInfo.getDelimiter());
+        for(int i =0;i<countBoltInput.length;i++)
+        FieldListenerSpout.writeToFile("/home/ghchen/output","CountBolt countBoltInput["+i+"]:"+countBoltInput[i]);
+        
+        String districtID =countBoltInput[7].replace("]", "");
+		double lan= Double.parseDouble(countBoltInput[5]);
+		double lon= Double.parseDouble(countBoltInput[6]);
+        
+//		String districtID =  input.getValues().get(7).toString();
+//		double lan= (Double)input.getValues().get(5);
+//		double lon= (Double)input.getValues().get(6);
 		SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		//Date dateTime = sdf.parse("2013-01-15 22:11:02");
-		Date dateTime;
+		Date dateTime = null;
 		long  interval=0;
+		double dist=Math.sqrt(Math.pow(lan-lanLast,2)+Math.pow(lon-lonLast,2));	
 		try {
-			dateTime = sdf.parse( (String)input.getValues().get(1) );
-			interval=(dateTime.getTime()-dateTimeLast.getTime())/1000; // convert dateTime form string to class Date	
+			dateTime = sdf.parse( countBoltInput[1].replace("[", ""));//.toString() );
+			FieldListenerSpout.writeToFile("/home/ghchen/output","dataTime:"+dateTime);
+			 // convert dateTime form string to class Date	
+			interval=(dateTime.getTime()-dateTimeLast.getTime())/1000;
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			System.out.println("CountBolt Error: can't assign value of Index [1] in input tuple !");
-		}  	
-
-		// to Seconds; 		
-		double dist=Math.sqrt(Math.pow(lan-lanLast,2)+Math.pow(lon-lonLast,2));	
-			
+		} 
+		
+		if(!districts.containsKey(districtID)){	
+			lanLast=lan;
+			lonLast=lon;
+			dateTimeLast=dateTime;	
+		}
 	    
 		/** If the word dosn't exist in the map we will create
 		 * this, if not We will creat a new thread and  add 1 */		
 		if(dist>DIST0 && interval>INTERVAL0){
-			if(districts.containsKey(districtID)){
+			if(districts.containsKey(districtID)){	
 				cnt =Integer.parseInt(districts.get(districtID).get(1)) + 1;
 				vehicleIdsInThisArea.add((String) input.getValues().get(1));
 
@@ -139,21 +140,8 @@ public class CountBolt implements IRichBolt {
 				districts.put(districtID, gpsLineList);
 			}
 			
-//---------------------------------------------			
-			try {
-				gpsDatafile = new FileWriter("/home/ghchen/districts");
-			      BufferedWriter writer= new BufferedWriter(gpsDatafile);
-			      
-			      	writer.write(districts.toString());
-
-			      writer.write("\n");
-			      writer.close(); 
-					
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}	
-			
+			FieldListenerSpout.writeToFile("/home/ghchen/output","CountBolt districts:"+districts.toString());
+		
     		lanLast = lan;
 			lonLast = lon;
 			try {
@@ -172,19 +160,8 @@ public class CountBolt implements IRichBolt {
 		
 		/* Every ten minute, we reset the list to null;	 * */		
 		if(0==(timeMinute%10)){   //every 10 minutes
-//----------------------------------------------------------------------			
-			FileWriter fwriter;
-			try {
-				fwriter = new FileWriter("/home/ghchen/vehiclesInDistrict");
-		        BufferedWriter districtWriter= new BufferedWriter(fwriter);
-		        districtWriter.write(districts.toString());
-		        districtWriter.write("\n");       
-		        districtWriter.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();     
-				System.out.println("CountBolt Error: can't write Vehicle IDs in this District to :/home/ghchen/vehiclesInDistrict");
-		    }
+	FieldListenerSpout.writeToFile("/home/ghchen/output","CountBolt vehicleIdsInThisArea:"+vehicleIdsInThisArea.toString());
+	
 			cnt=0;
 			vehicleIdsInThisArea=null;
 		}			

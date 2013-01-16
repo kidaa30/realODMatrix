@@ -61,7 +61,7 @@ public class TupleInfo implements Serializable{
 
 
 
-	public String getDelimiter() {
+	public static String getDelimiter() {
 		// TODO Auto-generated method stub
 		String delimiter=",";
 		return delimiter;

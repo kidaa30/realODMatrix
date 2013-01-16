@@ -44,19 +44,16 @@ public class FieldListenerSpout implements IRichSpout {
 		 if(file.equals(""))
 		 {
 			file="/home/ghchen/GPS_2011_09_27.txt";
-			 //file="D:\\Dropbox\\172.20.7.126-id_rsa.pub";
 		 }
 		 
 	try 
     	{	
-		 //this.context=context;
 
     	  this.fileReader = new BufferedReader(new FileReader(new File(file)));
     	} 
     catch (FileNotFoundException e) 
     	{
     		throw new RuntimeException ("error reading file ["+file+"]");
-    	    //System.exit(1);
     	}
     }
 
@@ -73,34 +70,15 @@ public class FieldListenerSpout implements IRichSpout {
                { 
                    if (line !=null)
                    {
-                	   //System.out.println("GPSLine : "+line);
-                	   for (int i=0;i<3;i++) {System.out.println("\n");}
-						//if (tupleInfo.getDelimiter().equals(","))
+                  	   for (int i=0;i<3;i++) {System.out.println("\n");}
 							GPSRecord =line.split(tupleInfo.getDelimiter());
-						     //       line.split("\\"+tupleInfo.getDelimiter());
-                       // else   GPSRecord = line.split("\\"+tupleInfo.getDelimiter());
-							
+						     //       line.split("\\"+tupleInfo.getDelimiter());							
 						
                         if (tupleInfo.getFieldList().size() == GPSRecord.length)
                            {
                         	_collector.emit(new Values(GPSRecord)); 
-                            tupleInfo = new TupleInfo(GPSRecord); 
-                            
-//                           for (int i=0;i<GPSRecord.length;i++) {
-//                        	   System.out.print(GPSRecord[i]+" ");
-//                           }
-//                           System.out.print("\n"); 
-                           
-//                            FileWriter gpsDatafile= new FileWriter("/home/ghchen/gpsData");
-//                            BufferedWriter writer= new BufferedWriter(gpsDatafile);
-//                            
-//                            for (int i=0;i<GPSRecord.length;i++) {
-//                            	writer.write(GPSRecord[i]);
-//                            }
-//                            writer.write("\n");
-//                            //writer.flush(); 
-//                            
-//                            writer.close();                 
+                            //tupleInfo = new TupleInfo(GPSRecord); 
+             
                            }
 
                            
@@ -157,6 +135,25 @@ public class FieldListenerSpout implements IRichSpout {
 	public Map<String, Object> getComponentConfiguration() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	static int count=0;
+	public static void writeToFile(String fileName, Object obj){
+		try {
+			count=count+1;
+			FileWriter fwriter;
+			fwriter= new FileWriter(fileName,true);
+		     BufferedWriter writer= new BufferedWriter(fwriter);
+		      
+		      	writer.write(count+": "+obj.toString());
+
+		      writer.write("\n");
+		      writer.close(); 
+				
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}		
 	}
 
 

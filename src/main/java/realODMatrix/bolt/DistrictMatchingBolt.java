@@ -12,6 +12,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ import backtype.storm.tuple.Values;
 //import main.java.realODMatrix.spout.Tuple;
 
 import backtype.storm.tuple.Tuple;
+import main.java.realODMatrix.spout.FieldListenerSpout;
 import main.java.realODMatrix.struct.*;
 
 /**
@@ -49,6 +51,7 @@ public class DistrictMatchingBolt implements IRichBolt {
 	Integer taskID;
 	String name;
 	List<Object> inputLine; 
+	Fields matchBoltDeclare=null;
 	
 
 
@@ -72,15 +75,13 @@ public class DistrictMatchingBolt implements IRichBolt {
 		Sects sects;
 		try {
 			sects = new Sects(path);
-//--------------------
-	      FileWriter gpsDatafile= new FileWriter("/home/ghchen/tuple",true);
-          BufferedWriter writer= new BufferedWriter(gpsDatafile);
-          
-          writer.write(input.toString());   
-          writer.write("\n");
-          writer.close();      
+			FieldListenerSpout.writeToFile("/home/ghchen/output","District Match input:"+input.toString());
+ 
 			
 		  List<Object> inputLine = input.getValues();//getFields();
+		  Fields inputLineFields = input.getFields();
+	FieldListenerSpout.writeToFile("/home/ghchen/output","DistrictMap inputLineFields"+inputLineFields);	  
+		  
 
 			record=new GPSRcrd(Double.parseDouble((String) inputLine.get(6)), 
 					Double.parseDouble((String) inputLine.get(5)), Integer.parseInt((String) inputLine.get(3)), 
@@ -94,27 +95,21 @@ public class DistrictMatchingBolt implements IRichBolt {
 			else
 			{
 				System.out.println("GPS Point falls into Sect No. :" + districtID);
+				FieldListenerSpout.writeToFile("/home/ghchen/output","DistrictBolt GPS Point falls into Sect No. ::"+districtID.toString());
 	
-//----------------------------------------------------------------				
-				try {
-					gpsDatafile = new FileWriter("/home/ghchen/districtID",true);
-				      BufferedWriter writer2= new BufferedWriter(gpsDatafile);
-				      
-				      	writer2.write("GPS Point falls into Sect No. :" + districtID);
-
-				      writer2.write("\n");
-				      writer2.close(); 
-						
-				} catch (IOException e1) {
-
-					e1.printStackTrace();
-				}
-				
 				
 			}
 			
 			inputLine.add(Integer.toString(districtID));
-			_collector.emit(new Values(inputLine));			
+			//input.
+			//input.add((Object)districtID);
+			
+			String[] obToStrings =null;
+			for (int i=0;i<inputLine.size();i++) obToStrings[i]=inputLine.get(i).toString();
+			
+//			matchBoltDeclare =new Fields(obToStrings);
+			  _collector.emit(new Values(obToStrings));
+			//_collector.emit(new Values(inputLine));			
 
 		} catch (IOException e) {
 
@@ -145,8 +140,9 @@ public class DistrictMatchingBolt implements IRichBolt {
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
 		// TODO Auto-generated method stub	
-		
-		declarer.declare(new Fields ("inputLine"));				
+        
+		//declarer.declare(matchBoltDeclare);
+		declarer.declare(new Fields ("matchedGPS"));				
 		
 	}
 
