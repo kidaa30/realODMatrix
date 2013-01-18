@@ -147,7 +147,7 @@ public class FieldListenerSpout implements IRichSpout {
 		      
 		      	writer.write(count+": "+obj.toString());
 
-		      writer.write("\n");
+		      writer.write("\n\n");
 		      writer.close(); 
 				
 		} catch (IOException e1) {

@@ -49,19 +49,20 @@ public class realODMatrixTopology  {
 	        
 	        TopologyBuilder builder = new TopologyBuilder();
 	        
-	        builder.setSpout("spout", fieldListenerSpout);//,2);	        
-	        builder.setBolt("matchingBolt", districtMacthingBolt).shuffleGrouping("spout");
+	        builder.setSpout("spout", fieldListenerSpout,1);	        
+	        builder.setBolt("matchingBolt", districtMacthingBolt,4).shuffleGrouping("spout");
 	        
-	        builder.setBolt("countBolt",countBolt).shuffleGrouping("matchingBolt"); 
+	        builder.setBolt("countBolt",countBolt,1).shuffleGrouping("matchingBolt"); 
 //	        builder.setBolt("dbBolt",dbWriterBolt,2).shuffleGrouping("countBolt");
 
 
 		    Config conf = new Config();
 	        if(args!=null && args.length > 0) {
-	            conf.setNumWorkers(3);            
+	            conf.setNumWorkers(6);            
 	            //StormSubmitter.
-	            LocalCluster  cluster= new LocalCluster();
-	            cluster.submitTopology(args[0], conf, builder.createTopology());
+	           // LocalCluster  cluster= new LocalCluster();
+	            //cluster.submitTopology(args[0], conf, builder.createTopology());
+	            StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
 	        } 
 	        else {     
 	              

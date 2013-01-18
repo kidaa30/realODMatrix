@@ -43,7 +43,7 @@ public class CountBolt implements IRichBolt {
 	double lanLast;   // last location of the vehicle
 	double lonLast;
 	Date dateTimeLast=null;
-	int INTERVAL0 = 180; // We set time windows between two points 180 seconds;
+	int INTERVAL0 = 120; // We set time windows between two points 120 seconds;
 	double DIST0=0.008993;  //  On the Earth, 1 Degree =111.2 km 
 	                        //Distance between two points 1km, shoule be 1/111.2 =0.008993 Degree;
 	
@@ -72,15 +72,11 @@ public class CountBolt implements IRichBolt {
 	     //FieldListenerSpout.writeToFile("/home/ghchen/output","CountBolt input:"+input.toString());
 
 		List<String> gpsLineList=new ArrayList<String>();  // List one sequence of data: count,time,vehicleIdsInThisArea
-        //int sizeofGPSLine=input.size();
+		//vehicleIdsInThisArea.add("0");
+
+        //List<Object>		countInput=input.getValues();
         
-        //Object[] 
-        List<Object>		countInput=input.getValues();
-        
-        //String  [] countBoltInput =countInput.toString().split(TupleInfo.getDelimiter());
-        //for(int i =0;i<countBoltInput.length;i++)
-        //FieldListenerSpout.writeToFile("/home/ghchen/output","CountBolt countBoltInput["+i+"]:"+countBoltInput[i]);
-        
+ 
 //        String districtID =countBoltInput[7].replace("]", "");
 //		double lan= Double.parseDouble(countBoltInput[5]);
 //		double lon= Double.parseDouble(countBoltInput[6]);
@@ -101,8 +97,8 @@ public class CountBolt implements IRichBolt {
 		//String time =sdf.format(dateTime);
 		long  interval=0;
 		double dist=Math.sqrt(Math.pow(lan-lanLast,2)+Math.pow(lon-lonLast,2));
-		FieldListenerSpout.writeToFile("/home/ghchen/output","DistrictID="+districtID+"lon="+lon+
-				"lan="+lan+"DateTime="+dateTime);
+		//FieldListenerSpout.writeToFile("/home/ghchen/output","DistrictID="+districtID+"lon="+lon+
+				//"lan="+lan+"DateTime="+dateTime);
 		
 		if(!districts.containsKey(districtID)){	
 			lonLast=lon;
@@ -110,7 +106,13 @@ public class CountBolt implements IRichBolt {
 			dateTimeLast=dateTime;
 			cnt=1;
 
-			if(input.getValues().get(1)!=null)vehicleIdsInThisArea.add(input.getValues().get(1).toString());
+			if(null==input.getValues().get(0)){  // VEHICLE ID
+				System.out.println("Error: Index 1 of input is NULL !");}
+			else
+				{
+				//vehicleIdsInThisArea.remove(0);
+				vehicleIdsInThisArea.add(input.getValues().get(0).toString());}
+			
 			
 			gpsLineList.add(districtID);
 			gpsLineList.add(cnt.toString());
@@ -124,10 +126,11 @@ public class CountBolt implements IRichBolt {
 		
 
 		/** If the word dosn't exist in the map we will create
-		 * this, if not We will creat a new thread and  add 1 */		
+		 * this, if not We will create a new thread and  add 1 */		
 		if(dist>DIST0 && interval>INTERVAL0){
 			if(districts.containsKey(districtID)){	
 				cnt =Integer.parseInt(districts.get(districtID).get(1)) + 1;
+				//vehicleIdsInThisArea.remove(0);
 				vehicleIdsInThisArea.add((String) input.getValues().get(1));
 
 				gpsLineList.add(districtID);
@@ -146,8 +149,8 @@ public class CountBolt implements IRichBolt {
 			} catch (ParseException e) {
 				e.printStackTrace();
 			}
-			FieldListenerSpout.writeToFile("/home/ghchen/output","vehicleIdsInThisArea:"+vehicleIdsInThisArea.toString());
-			FieldListenerSpout.writeToFile("/home/ghchen/output","CountBolt districts:"+districts.toString());
+			FieldListenerSpout.writeToFile("/home/ghchen/vehicleIdsInThisArea","vehicleIdsInThisArea:"+vehicleIdsInThisArea.toString());
+			FieldListenerSpout.writeToFile("/home/ghchen/districts","CountBolt districts:"+districts.toString());
 		_collector.emit(new Values(districts));
 
 		}
