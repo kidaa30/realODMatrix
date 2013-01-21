@@ -50,7 +50,7 @@ public class CountBolt implements IRichBolt {
 	private OutputCollector _collector;	
 	Integer taskId;
 	String taskName;
-	Map<String, List<String> > districts;
+	Map<String, List<String> > districts; //DistrictID, vehicleIdsInThisArea
 	List<String> vehicleIdsInThisArea=new ArrayList<String>(); 
 	Integer cnt;
 	
@@ -81,7 +81,7 @@ public class CountBolt implements IRichBolt {
 //		double lan= Double.parseDouble(countBoltInput[5]);
 //		double lon= Double.parseDouble(countBoltInput[6]);
         
-		String districtID =  input.getValues().get(7).toString();
+		String districtID =  input.getValues().get(7).toString(); //DistrictID
 		double lan= Double.parseDouble(input.getValues().get(5).toString());
 		double lon= Double.parseDouble(input.getValues().get(6).toString());
         
@@ -107,14 +107,17 @@ public class CountBolt implements IRichBolt {
 			cnt=1;
 
 			if(null==input.getValues().get(0)){  // VEHICLE ID
-				System.out.println("Error: Index 1 of input is NULL !");}
+				
+				System.out.println("Error: Index 1 of input is NULL !");				
+				return;
+				}
 			else
 				{
 				//vehicleIdsInThisArea.remove(0);
 				vehicleIdsInThisArea.add(input.getValues().get(0).toString());}
 			
 			
-			gpsLineList.add(districtID);
+			//gpsLineList.add(districtID);
 			gpsLineList.add(cnt.toString());
 			gpsLineList.add(input.getValues().get(1).toString());	// get Time stamp from input	
 			gpsLineList.addAll(vehicleIdsInThisArea);  				
@@ -151,7 +154,7 @@ public class CountBolt implements IRichBolt {
 			}
 			FieldListenerSpout.writeToFile("/home/ghchen/vehicleIdsInThisArea","vehicleIdsInThisArea:"+vehicleIdsInThisArea.toString());
 			FieldListenerSpout.writeToFile("/home/ghchen/districts","CountBolt districts:"+districts.toString());
-		_collector.emit(new Values(districts));
+		//_collector.emit(new Values(districts));
 
 		}
 

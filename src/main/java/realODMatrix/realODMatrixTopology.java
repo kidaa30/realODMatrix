@@ -60,9 +60,9 @@ public class realODMatrixTopology  {
 	        if(args!=null && args.length > 0) {
 	            conf.setNumWorkers(6);            
 	            //StormSubmitter.
-	           // LocalCluster  cluster= new LocalCluster();
-	            //cluster.submitTopology(args[0], conf, builder.createTopology());
-	            StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
+	            LocalCluster  cluster= new LocalCluster();
+	            cluster.submitTopology(args[0], conf, builder.createTopology());
+	           // StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
 	        } 
 	        else {     
 	              
