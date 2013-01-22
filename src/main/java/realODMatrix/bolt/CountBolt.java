@@ -7,12 +7,20 @@
  */
 package main.java.realODMatrix.bolt;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.TimerTask;
+
+
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.IRichBolt;
@@ -24,6 +32,9 @@ import java.util.List;
 
 import main.java.realODMatrix.spout.FieldListenerSpout;
 import main.java.realODMatrix.spout.TupleInfo;
+import main.java.realODMatrix.struct.GPSRcrd;
+
+import java.util.Timer;
 
 
 /**
@@ -50,18 +61,83 @@ public class CountBolt implements IRichBolt {
 	private OutputCollector _collector;	
 	Integer taskId;
 	String taskName;
-	Map<String, List<String> > districts; //DistrictID, vehicleIdsInThisArea
+	//Map<String, List<String> > districts; //DistrictID, vehicleIdsInThisArea
+	public  LinkedList<District>  districts = new  LinkedList<District>();
 	List<String> vehicleIdsInThisArea=new ArrayList<String>(); 
 	Integer cnt;
+	Timer timer;
+	
+	public class District 
+	{
+		public String districtId;
+		public int count;//计算次数，是车牌号的个数码
+		public Date dateTime; //应该是该小区统计的时候的起始时间
+		public HashMap<String,Date> viechleIDList; //存放车辆Id的集合,也要把时间存者，以对每一辆车进行计算时间距离
+		public HashMap<String,String> vieLngLatIDList; //存放车辆Id的集合,也要把时间存者，以对每一辆车进行计算时间距离
+	}
+	
+	public  District  getDistrictById(String districtId){
+		for(District d : districts){
+			if(d.districtId.equals(districtId)){
+				return d;
+			}
+		}
+		return null;
+	}
+	
+	public  String getlngLatByViecheId(String districtId,String viechId){
+		for(District d : districts){
+			if(d.districtId.equals(districtId)){
+				return  d.vieLngLatIDList.get(viechId);
+			}
+		}
+		return null;
+	}
+	
+	public  void setlngLatByViecheId(String districtId,String viechId,String lngLat){
+		for(District d : districts){
+			if(d.districtId.equals(districtId)){
+			   d.vieLngLatIDList.put(viechId, lngLat);
+			}
+		}
+	}
+	
+	public  Date getDateByViecheId(String districtId,String viechId){
+		for(District d : districts){
+			if(d.districtId.equals(districtId)){
+				return  d.viechleIDList.get(viechId);
+			}
+		}
+		return null;
+	}
+	
+	public  void setDateByViecheId(String districtId,String viechId,Date dateTime){
+		for(District d : districts){
+			if(d.districtId.equals(districtId)){
+			   d.viechleIDList.put(viechId, dateTime);
+			}
+		}
+	}
+	
+	
+    public  Boolean isDisExits(List<District>  districts,  String districtId){
+    	for(District d : districts){
+			if(d.districtId.equals(districtId)){
+				return true;
+			}
+		}
+    	return false;
+    }
+	
+	
 	
 	@Override
 	public void prepare(Map stormConf, TopologyContext context,
 			OutputCollector collector) {
 		// TODO Auto-generated method stub
-		this.districts = new HashMap<String, List<String>>();
 		this.taskName = context.getThisComponentId();
 		this.taskId = context.getThisTaskId();
-		this._collector=collector;		
+		this._collector = collector;		
 	}
 
 	
@@ -69,115 +145,99 @@ public class CountBolt implements IRichBolt {
 	@Override
 	public void execute(Tuple input) {
 		
-	     //FieldListenerSpout.writeToFile("/home/ghchen/output","CountBolt input:"+input.toString());
-
-		List<String> gpsLineList=new ArrayList<String>();  // List one sequence of data: count,time,vehicleIdsInThisArea
-		//vehicleIdsInThisArea.add("0");
-
-        //List<Object>		countInput=input.getValues();
-        
- 
-//        String districtID =countBoltInput[7].replace("]", "");
-//		double lan= Double.parseDouble(countBoltInput[5]);
-//		double lon= Double.parseDouble(countBoltInput[6]);
-        
-		String districtID =  input.getValues().get(7).toString(); //DistrictID
-		double lan= Double.parseDouble(input.getValues().get(5).toString());
-		double lon= Double.parseDouble(input.getValues().get(6).toString());
-        
-		SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		//Date dateTime = sdf.parse("2013-01-15 22:11:02");
-		Date dateTime=null;
+		String districtID = input.getValues().get(7).toString();
+		double lan = Double.parseDouble(input.getValues().get(5).toString());//纬度
+		double lon = Double.parseDouble(input.getValues().get(6).toString()); //经度
+		String viechId = input.getValues().get(0).toString();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Date dateTime = null;
 		try {
 			dateTime = sdf.parse(input.getValues().get(1).toString());
+			
 		} catch (ParseException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
-		}//new Date();
-		//String time =sdf.format(dateTime);
-		long  interval=0;
-		double dist=Math.sqrt(Math.pow(lan-lanLast,2)+Math.pow(lon-lonLast,2));
-		//FieldListenerSpout.writeToFile("/home/ghchen/output","DistrictID="+districtID+"lon="+lon+
-				//"lan="+lan+"DateTime="+dateTime);
+		}
 		
-		if(!districts.containsKey(districtID)){	
-			lonLast=lon;
-			lanLast=lan;
-			dateTimeLast=dateTime;
-			cnt=1;
-
-			if(null==input.getValues().get(0)){  // VEHICLE ID
+		if (!isDisExits(districts, districtID)) {
+			 //没有此小区，则新建一个小区，并存起来			
+			//System.out.println("districtID:"+districtID+"dateTime:"+dateTime+"viechId"+viechId);
+			District district = new District();
+			district.viechleIDList = new HashMap<String,Date>() ; //存放车辆Id的集合,也要把时间存者，以对每一辆车进行计算时间距离
+			district.vieLngLatIDList= new HashMap<String,String>() ;
+			
+			district.districtId = districtID;
+			district.count = 1;
+			district.dateTime = dateTime;
+			district.viechleIDList.put(viechId, dateTime);
+			district.vieLngLatIDList.put(viechId, lon+"_"+lan);
+			
+			districts.add(district);  //添加小区
+			return ;
+			  
+		}else{   //如果已经有该小区
+			District district=getDistrictById(districtID);
+			if(!district.viechleIDList.containsKey(viechId)){  //但是如果车辆ID是第一次进入该区域，新建一个车辆ID，并保存；
+				district.count++;
+				district.dateTime = dateTime;
+				district.viechleIDList.put(viechId, dateTime);
+				district.vieLngLatIDList.put(viechId, lon+"_"+lan);				
+			}else{ //否则，这辆车是多次出现在该区域，则判断这个车辆ID 和上一次出现的时间间隔和距离
+				String lngLat = getlngLatByViecheId(districtID,viechId);
+				String[]  s = lngLat.split("_");
+				lonLast = Double.parseDouble(s[0]);
+				lanLast = Double.parseDouble(s[1]);
 				
-				System.out.println("Error: Index 1 of input is NULL !");				
-				return;
+				long interval = 0;
+				dateTimeLast = getDateByViecheId(districtID, viechId);
+				interval = (dateTime.getTime() - dateTimeLast.getTime()) / 1000;
+				double dist = Math.sqrt(Math.pow(lan - lanLast, 2) + Math.pow(lon - lonLast, 2));
+				
+				if (dist > DIST0 && interval > INTERVAL0) {					
+					
+					district.count ++;
+					district.dateTime = dateTime;
+					district.viechleIDList.put(viechId, dateTime);
+					district.vieLngLatIDList.put(viechId, lon+"_"+lan);	
+				}else{
+					return;					
 				}
-			else
-				{
-				//vehicleIdsInThisArea.remove(0);
-				vehicleIdsInThisArea.add(input.getValues().get(0).toString());}
-			
-			
-			//gpsLineList.add(districtID);
-			gpsLineList.add(cnt.toString());
-			gpsLineList.add(input.getValues().get(1).toString());	// get Time stamp from input	
-			gpsLineList.addAll(vehicleIdsInThisArea);  				
-			
-			districts.put(districtID, gpsLineList);
-		}
-		 // convert dateTime form string to class Date	
-		interval=(dateTime.getTime()-dateTimeLast.getTime())/1000; 
-		
-
-		/** If the word dosn't exist in the map we will create
-		 * this, if not We will create a new thread and  add 1 */		
-		if(dist>DIST0 && interval>INTERVAL0){
-			if(districts.containsKey(districtID)){	
-				cnt =Integer.parseInt(districts.get(districtID).get(1)) + 1;
-				//vehicleIdsInThisArea.remove(0);
-				vehicleIdsInThisArea.add((String) input.getValues().get(1));
-
-				gpsLineList.add(districtID);
-				gpsLineList.add(cnt.toString());
-				gpsLineList.add(input.getValues().get(1).toString());	// get Time stamp from input	
-				gpsLineList.addAll(vehicleIdsInThisArea);  
-
-				districts.put(districtID, gpsLineList);	
-
-			}		
-    		lanLast = lan;
-			lonLast = lon;
-			
-			try {
-				dateTimeLast=sdf.parse(input.getValues().get(1).toString());
-			} catch (ParseException e) {
-				e.printStackTrace();
 			}
-			FieldListenerSpout.writeToFile("/home/ghchen/vehicleIdsInThisArea","vehicleIdsInThisArea:"+vehicleIdsInThisArea.toString());
-			FieldListenerSpout.writeToFile("/home/ghchen/districts","CountBolt districts:"+districts.toString());
-		//_collector.emit(new Values(districts));
-
 		}
+				
+
+		Date nowDate=new Date();
+		SimpleDateFormat sdf2= new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
+		int min=nowDate.getMinutes();
+		int second=nowDate.getSeconds();
+		if( (min%10) ==0 && (second==0) ){
+			String nowTime=sdf2.format(nowDate);
+			CountBolt.writeToFile("vehicleList-"+nowTime,districts);	
+		}
+		
+//		timer=new Timer(true);
+//		TimerTask Job= new TimerTask() {		
+//			@Override
+//			public void run() {
+//				SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
+//				String nowtime=sdf.format(new Date());
+//				CountBolt.writeToFile("vehicleList-"+nowtime,districts);
+//			}
+//		};
+//		timer.schedule(Job,0, 60*1000);  //every 600 seconds.
 
 		
-		Date nowtime=new Date();
-		int  timeMinute= nowtime.getMinutes();	
-		
-		/* Every ten minute, we reset the list to null;	 * */		
-		if(0==(timeMinute%10)){   //every 10 minutes
-			cnt=0;
-			vehicleIdsInThisArea=null;
-		}			
 		_collector.ack(input);
+	
 	}
 
 	
 	@Override
 	public void cleanup() {
 		System.out.println("-- Word Counter ["+taskName+"-"+taskId+"] --");
-		for(Map.Entry<String, List<String> > entry : districts.entrySet()){
-			System.out.println(entry.getKey()+": "+entry.getValue());
-		}
-		
+//		for(Map.Entry<GPSRcrd, Integer> entry : gpsMatch.entrySet()){
+//		System.out.println(entry.getKey()+": "+entry.getValue());
+//		}
+	
 	}
 
 	
@@ -193,5 +253,53 @@ public class CountBolt implements IRichBolt {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+    static class Job extends java.util.TimerTask{   
+        @Override  
+        public void run() {   
+            // TODO Auto-generated method stub  
+         
+        }  
+    } 
+    
+	public static void writeToFile(String fileName, LinkedList<District> districts){
+		try {
+              BufferedWriter br = new BufferedWriter(new FileWriter(fileName,true));
+     		  SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//				String nowtime=sdf.format(new Date());
+              for(District d:districts){
+//            	  br.write(d.districtId+","+d.count+"#"+d.viechleIDList.values()+";"+
+//                    d.vieLngLatIDList.values()+"\n"); 
+            	  br.write(d.districtId+","+d.count+"#");
+          		for(Map.Entry<String,Date> entry : d.viechleIDList.entrySet()){   //车牌号和时间
+          			String lonLanString=d.vieLngLatIDList.get(entry.getKey()); 
+          			//if(entry.getKey()!=null && entry.getValue()!=null && lonLanString!=null)
+          			br.write(entry.getKey()+","+sdf.format(entry.getValue()) +","+lonLanString+";");
+         			System.out.println(entry.getKey()+","+entry.getValue()+","+lonLanString+";");
+          			}
+          		br.write("\r\n");
+
+          		//System.out.println("\n");
+              }         
+           
+              /*for(District d : districts){
+               	  br.write(d.districtId + ","+ d.count + "#");
+            	  HashMap<String ,String> viechIds = d.vieLngLatIDList;
+            	  Set<String> set = viechIds.keySet();
+            	  Iterator<String> iterator = set.iterator();
+            	  while(iterator.hasNext()){
+            		  String id = iterator.next();
+            		  br.write(id+"    ");
+            	  }
+              }*/
+		      br.flush();
+		      br.close();		      
+        	  districts.clear();				
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}		
+	}
+
 
 }

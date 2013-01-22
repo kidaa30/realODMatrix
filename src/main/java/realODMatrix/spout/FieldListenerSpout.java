@@ -10,6 +10,7 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 import backtype.storm.utils.Utils;
 import main.java.realODMatrix.spout.TupleInfo;
+import main.java.realODMatrix.struct.GPSRcrd;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -18,8 +19,15 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
+
+import main.java.realODMatrix.bolt.CountBolt.District;
 
 
 public class FieldListenerSpout implements IRichSpout {
@@ -49,7 +57,7 @@ public class FieldListenerSpout implements IRichSpout {
 	try 
     	{	
 
-    	  this.fileReader = new BufferedReader(new FileReader(new File(file)));
+    	  this.fileReader = new BufferedReader(new FileReader(new File(file))); 
     	} 
     catch (FileNotFoundException e) 
     	{
@@ -65,7 +73,8 @@ public class FieldListenerSpout implements IRichSpout {
         String line = null;  
         BufferedReader access= new BufferedReader(fileReader);
            try 
-           {  
+           {         		   
+        	   
                while ((line = access.readLine()) != null)
                { 
                    if (line !=null)
@@ -79,14 +88,16 @@ public class FieldListenerSpout implements IRichSpout {
                         	_collector.emit(new Values(GPSRecord)); 
                             //tupleInfo = new TupleInfo(GPSRecord); 
              
-                           }
-
-                           
+                           }                          
                    }          
                } 
+              
+//               if(line==-1){
+//            	  System.out.println("Storm has reached the end of file /home/ghchen/GPS_2011_09_27.txt !");             	   
+//               }
           } 
           catch (IOException ex) {
-        	  throw new RuntimeException("error:fail to new Tuple object in declareOutputFields, tuple is null",ex);  
+        	  throw new RuntimeException("error:fail to read from file /home/ghchen/GPS_2011_09_27.txt",ex);  
   		}    	  		
         
            
@@ -155,6 +166,7 @@ public class FieldListenerSpout implements IRichSpout {
 			e1.printStackTrace();
 		}		
 	}
+	
 
 
     

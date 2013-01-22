@@ -90,9 +90,8 @@ public class DistrictMatchingBolt implements IRichBolt {
 			else
 			{
 				System.out.println("GPS Point falls into Sect No. :" + districtID);
-				FieldListenerSpout.writeToFile("/home/ghchen/output","DistrictBolt GPS Point falls into Sect No. ::"+districtID.toString());
-	
-				
+				//FieldListenerSpout.writeToFile("/home/ghchen/districtID","DistrictBolt GPS Point falls into Sect No. ::"+districtID.toString());
+					
 			}
 			
 			inputLine.add(Integer.toString(districtID));			
@@ -129,9 +128,9 @@ public class DistrictMatchingBolt implements IRichBolt {
 		// TODO Auto-generated method stub
 		
 		System.out.println("-- District Mathchier ["+taskname+"-"+districtID+"] --");
-		//for(Map.Entry<GPSRcrd, Integer> entry : gpsMatch.entrySet()){
-		//System.out.println(entry.getKey()+": "+entry.getValue());
-		//}
+		for(Map.Entry<GPSRcrd, Integer> entry : gpsMatch.entrySet()){
+		System.out.println(entry.getKey()+": "+entry.getValue());
+		}
 		
 	}
 

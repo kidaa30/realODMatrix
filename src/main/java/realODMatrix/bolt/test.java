@@ -28,10 +28,10 @@ public class test {
 	public static void main(String[] args)  {
 		// TODO Auto-generated method stub
 		
-		SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+		SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
 		Date dateTime;
 		try {
-			dateTime = sdf.parse("2012-08-15 22:11:02");
+			dateTime = sdf.parse("2012-08-15-22-11-02");
 			
 			String dateString = sdf.format(dateTime);
 			int  minute= dateTime.getMinutes();

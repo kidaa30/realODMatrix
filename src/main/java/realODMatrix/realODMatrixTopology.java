@@ -62,7 +62,7 @@ public class realODMatrixTopology  {
 	            //StormSubmitter.
 	            LocalCluster  cluster= new LocalCluster();
 	            cluster.submitTopology(args[0], conf, builder.createTopology());
-	           // StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
+	            //StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
 	        } 
 	        else {     
 	              
