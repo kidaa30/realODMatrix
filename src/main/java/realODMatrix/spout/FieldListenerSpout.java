@@ -19,6 +19,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -39,39 +41,57 @@ public class FieldListenerSpout implements IRichSpout {
     private TupleInfo tupleInfo=new TupleInfo();
     String[] GPSRecord=null;
     //Fields fields;
-
+    
+    Socket sock=null;
     
     @Override
     public void close() {
     }
 
     @Override
-    public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
-        _collector = collector;
-		 String file=new String();
-		 if(file.equals(""))
-		 {
-			file="/home/ghchen/GPS_2011_09_27.txt";
-		 }
-		 
-	try 
-    	{	
+    public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) 
+		{
+		    _collector = collector;
+		    
+		    try {
+				sock=new Socket("172.20.14.204",15025);
+			} catch (UnknownHostException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		    
+/*		 String file=new String();
+			 if(file.equals(""))
+			 {
+				file="/home/ghchen/GPS_2011_09_27.txt";
+			 }
+			 
+		try 
+			{	
 
-    	  this.fileReader = new BufferedReader(new FileReader(new File(file))); 
-    	} 
-    catch (FileNotFoundException e) 
-    	{
-    		throw new RuntimeException ("error reading file ["+file+"]");
-    	}
-    }
+			  this.fileReader = new BufferedReader(new FileReader(new File(file))); 
+			} 
+		catch (FileNotFoundException e) 
+			{
+				throw new RuntimeException ("error reading file ["+file+"]");
+			}*/
+		    
+		}
+//	} catch (Exception e) {
+//		// TODO Auto-generated catch block
+//		e.printStackTrace();
+//	}
 
     @Override
     public void nextTuple() {    	
    
         Utils.sleep(2000);
        // RandomAccessFile access = null; 
-        String line = null;  
-        BufferedReader access= new BufferedReader(fileReader);
+        /*String line = null;  
+		  BufferedReader access= new BufferedReader(fileReader);
            try 
            {         		   
         	   
@@ -90,14 +110,31 @@ public class FieldListenerSpout implements IRichSpout {
              
                            }                          
                    }          
-               } 
+               } */
+        String gpsString;
+		try {
+			gpsString = (String) SocketJava.receive(sock);
+			GPSRecord =gpsString.split(TupleInfo.getDelimiter());	
+			
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+							
+	
+   if (tupleInfo.getFieldList().size() == GPSRecord.length)
+      {
+   	_collector.emit(new Values(GPSRecord)); 
+       //tupleInfo = new TupleInfo(GPSRecord); 
+        
               
 //               if(line==-1){
 //            	  System.out.println("Storm has reached the end of file /home/ghchen/GPS_2011_09_27.txt !");             	   
 //               }
-          } 
-          catch (IOException ex) {
-        	  throw new RuntimeException("error:fail to read from file /home/ghchen/GPS_2011_09_27.txt",ex);  
+//          } 
+//          catch (IOException ex) {
+//        	  throw new RuntimeException("error:fail to read from file /home/ghchen/GPS_2011_09_27.txt",ex);  
   		}    	  		
         
            

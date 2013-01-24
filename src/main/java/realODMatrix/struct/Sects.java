@@ -89,7 +89,7 @@ public class Sects {
 		
 		//Initializations
 		//String path = "E:/datasource/sztb/dat/base/sects/Sects.shp";
-		String path = "D:\\shenzhen GIS\\交通小区划分\\交通小区划分\\sects\\Sects.shp";
+		String path = "D:\\shenzhen GIS\\浜ら�灏忓尯鍒掑垎\\浜ら�灏忓尯鍒掑垎\\sects\\Sects.shp";
 		Sects sects = new Sects(path);
 		GPSRcrd record = new GPSRcrd(118716,32110,100,100);
 		
@@ -124,12 +124,12 @@ public class Sects {
 		ps.add(p4);
 		ps.add(p1);
 		Polygon pg = new Polygon(ps);
-		System.out.println("包含："+pg.contains(tp1));
-		System.out.println("相离："+pg.contains(tp2));
-		System.out.println("右边界相交："+pg.contains(tp3));
-		System.out.println("左边界相交："+pg.contains(tp4));
-		System.out.println("上边界相交："+pg.contains(tp5));
-		System.out.println("下边界相交："+pg.contains(tp6));
+		System.out.println(" contains:"+pg.contains(tp1));
+		System.out.println(" intersect: "+pg.contains(tp2));
+		System.out.println("intersect with righ boundary:"+pg.contains(tp3));
+		System.out.println("intersect with left boundary:"+pg.contains(tp4));
+		System.out.println("intersect with top boundary :"+pg.contains(tp5));
+		System.out.println("intersect with bottom boundary: "+pg.contains(tp6));
 		
 		
 		return;

@@ -48,6 +48,10 @@ public class DistrictMatchingBolt implements IRichBolt {
 	List<Object> inputLine; 
 	Fields matchBoltDeclare=null;
 	
+	static String path = "/home/ghchen/sects/sects.shp";
+	static Sects sects=null ;	
+	int count=0;
+
 
 
 	
@@ -66,10 +70,12 @@ public class DistrictMatchingBolt implements IRichBolt {
 	public void execute(Tuple input) {
 		// TODO Auto-generated method stub
 		//String path = "E:/datasource/sztb/dat/base/sects/Sects.shp";
-		String path = "/home/ghchen/sects/sects.shp";
-		Sects sects;
+
 		try {
-			sects = new Sects(path);
+			if(sects==null){
+			sects= new Sects(path);
+			}
+			
 			//FieldListenerSpout.writeToFile("/home/ghchen/output","District Match input:"+input.toString());
  
 			
@@ -89,7 +95,7 @@ public class DistrictMatchingBolt implements IRichBolt {
 				System.out.println("no sects contain this record");
 			else
 			{
-				System.out.println("GPS Point falls into Sect No. :" + districtID);
+				System.out.println(count++ +". GPS Point falls into Sect No. :" + districtID);
 				//FieldListenerSpout.writeToFile("/home/ghchen/districtID","DistrictBolt GPS Point falls into Sect No. ::"+districtID.toString());
 					
 			}
@@ -109,10 +115,6 @@ public class DistrictMatchingBolt implements IRichBolt {
 			_collector.emit(new Values(obToStrings));
 			//_collector.emit(new Values(inputLine));			
 
-		} catch (IOException e) {
-
-			e.printStackTrace();
-			throw new RuntimeException("Error reading tuple",e);
 		} catch (Exception e) {
 
 			e.printStackTrace();
