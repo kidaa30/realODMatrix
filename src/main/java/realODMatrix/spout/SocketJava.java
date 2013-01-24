@@ -9,9 +9,7 @@ package main.java.realODMatrix.spout;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.net.UnknownHostException;
 
-import org.apache.commons.collections.map.StaticBucketMap;
 
 import com.ibm.icu.text.DecimalFormat;
 /**
@@ -43,15 +41,17 @@ public class SocketJava {
     static String GPSline=new String();
 	static  String out=new String();
 	
-	public static void main(String[] args) throws Throwable    {
+	public static void main(String[] args) throws Exception    {
 		sock=new Socket("172.20.14.204",15025);
-		receive(sock);
-		System.out.println("success !");
+		int err=receive(sock);
+		if(err<0)
+		System.out.println("Socket failed !");
 		
 	}
 
 
 	
+	@SuppressWarnings("unused")
 	public static int receive(Socket sock) throws Exception { 
 	
 		System.out.println("#---------连接成功，数据接收中.........\n");
@@ -60,33 +60,41 @@ public class SocketJava {
 		System.out.println("#    *为一条营运数据\n");
 
 		int count=0;
+		int ch=0;
 		while(true){
 			byte[] b3=new byte[3];
 			sock.getInputStream().read(b3,0,3);
-			int ch=b3[0];
+			if(b3==null){
+				System.out.println("read First 3 byte from socket failed ! ");
+				return -1;
+			}else
+			ch=b3[0];
 
 			int len=bytesToShort(b3, 1);
 			byte[] bytelen= new byte[len];
 			sock.getInputStream().read(bytelen);
+			if(bytelen==null){
+				System.out.println("read the second part from byte from socket failed ! ");
+				return -2;
+			}
 
 
  
 			DissectOneMessage(ch,bytelen);
 			//System.out.println(count++ +":\n");
 
-		}	  
+		}
 
 	}
 
-	public static void DissectOneMessage(int ch,  byte[] msg) throws Exception{
+	public static String DissectOneMessage(int ch,  byte[] msg) throws Exception{
 		int len=msg.length;
 		switch (ch) {
 		case 0x02:
 			//System.out.println("received GPS record ! len="+len+"\t");
-			System.out.print(".");
-			DissectPositionInfo(msg, msg.length);
-			break;
-
+			System.out.print(". ");
+			String mm=DissectPositionInfo(msg, msg.length);
+			return mm ;
 		case 0x03:
 			//System.out.println("received warning record ! len="+len+"\n");
 			System.out.print("#");
@@ -97,11 +105,16 @@ public class SocketJava {
 			break;
 		default:
 			System.out.println("@@@		Unknow unit code, unit code="+ch+"		@@@\n");
-			sock = new Socket("172.20.14.204", 15025);
+			if(sock!=null){sock.close();}
+			Thread.sleep(1000);
+			
+
+			 sock = new Socket("172.20.14.204", 15025);
+
 
 			break;
 		}	
-
+       return null;
 	}
 
 
@@ -246,8 +259,11 @@ public class SocketJava {
 				//System.out.println("	Car Color:"+plate+"\n");
 				GPSline=GPSline+plate +"\n";
 				plate=null;
-				//System.out.println(GPSline);
+				//System.out.println("GPSline = "+GPSline);
 				String[] newGps=GPSline.split(",");
+				//System.out.println("newGps.length = "+newGps.length);
+				//for(int i=0;i<newGps.length;i++){
+				//System.out.print(newGps[i]+",");}
 
 				out=newGps[0]+","+newGps[3]+","+newGps[7]+","+newGps[5]+","+
 				     newGps[6]+","+newGps[2]+","+newGps[1]+"\n";
@@ -255,7 +271,6 @@ public class SocketJava {
 				//System.out.println(out);
 				return out;
 								
-				break;
 			default:
 				System.out.println("### 	Error: can't resort message info!   #### unit_id=\n"+unit_id);
 				
@@ -263,7 +278,7 @@ public class SocketJava {
 
 			}
 		}
-		return 0;
+		return null;
 	}
 
 public static String getGPSrecord() throws Throwable{

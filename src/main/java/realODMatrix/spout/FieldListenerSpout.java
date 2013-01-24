@@ -39,10 +39,10 @@ public class FieldListenerSpout implements IRichSpout {
     //private TopologyContext context;
     //private String file="/home/ghchen/2013-01-05.1/2013-01-05--11_05_48.txt";
     private TupleInfo tupleInfo=new TupleInfo();
-    String[] GPSRecord=null;
+    
     //Fields fields;
     
-    Socket sock=null;
+    static Socket sock=null;
     
     @Override
     public void close() {
@@ -54,14 +54,18 @@ public class FieldListenerSpout implements IRichSpout {
 		    _collector = collector;
 		    
 		    try {
-				sock=new Socket("172.20.14.204",15025);
+		    	if(sock==null){
+		    		sock=new Socket("172.20.14.204",15025);
+		    	}
+				
 			} catch (UnknownHostException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
+			}   
+
 		    
 /*		 String file=new String();
 			 if(file.equals(""))
@@ -85,7 +89,8 @@ public class FieldListenerSpout implements IRichSpout {
 //		e.printStackTrace();
 //	}
 
-    @Override
+    @SuppressWarnings("unused")
+	@Override
     public void nextTuple() {    	
    
         Utils.sleep(2000);
@@ -93,8 +98,7 @@ public class FieldListenerSpout implements IRichSpout {
         /*String line = null;  
 		  BufferedReader access= new BufferedReader(fileReader);
            try 
-           {         		   
-        	   
+           {  		   
                while ((line = access.readLine()) != null)
                { 
                    if (line !=null)
@@ -106,26 +110,63 @@ public class FieldListenerSpout implements IRichSpout {
                         if (tupleInfo.getFieldList().size() == GPSRecord.length)
                            {
                         	_collector.emit(new Values(GPSRecord)); 
-                            //tupleInfo = new TupleInfo(GPSRecord); 
-             
+                            //tupleInfo = new TupleInfo(GPSRecord);              
                            }                          
                    }          
                } */
-        String gpsString;
-		try {
-			gpsString = (String) SocketJava.receive(sock);
-			GPSRecord =gpsString.split(TupleInfo.getDelimiter());	
+	    
+		int count=0;
+		int ch=0;
+		while(true){
+			byte[] b3=new byte[3];
+			try {				
+				 sock.getInputStream().read(b3,0,3);
+
+				if(b3==null){
+					System.out.println("read First 3 byte from socket failed ! ");
+					break;
+				}else{
+				ch=b3[0];}				
+				//System.out.println("ch="+ch);
+				int len=SocketJava.bytesToShort(b3, 1);
+				//System.out.println("len="+len);
+				byte[] bytelen= new byte[len];
+				sock.getInputStream().read(bytelen);
+				if(bytelen==null){
+					System.out.println("read the second part from byte from socket failed ! ");
+					break;
+				}
+				 
+				String gpsString=SocketJava.DissectOneMessage(ch,bytelen);
+				String[] GPSRecord=null;
+				if(gpsString!=null){
+					GPSRecord =gpsString.split(TupleInfo.getDelimiter());
+				//System.out.print("GPS Record= :");
+//				for(int i=0;i<GPSRecord.length;i++)
+//				System.out.print(GPSRecord[i]+",");
+				
+				}else{
+					break;
+					}
+				//System.out.print("  Size of GPS record = "+GPSRecord.length+"\n");
+				 if (tupleInfo.getFieldList().size() == GPSRecord.length)
+			      {
+			   	_collector.emit(new Values(GPSRecord)); 
+			      }
+				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}	
 			
-			
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
+
 							
 	
-   if (tupleInfo.getFieldList().size() == GPSRecord.length)
-      {
-   	_collector.emit(new Values(GPSRecord)); 
+  
        //tupleInfo = new TupleInfo(GPSRecord); 
         
               
@@ -135,7 +176,7 @@ public class FieldListenerSpout implements IRichSpout {
 //          } 
 //          catch (IOException ex) {
 //        	  throw new RuntimeException("error:fail to read from file /home/ghchen/GPS_2011_09_27.txt",ex);  
-  		}    	  		
+ 	  		
         
            
     }        
