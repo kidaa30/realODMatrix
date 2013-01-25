@@ -93,7 +93,7 @@ public class FieldListenerSpout implements IRichSpout {
 	@Override
     public void nextTuple() {    	
    
-        Utils.sleep(2000);
+        Utils.sleep(1000);
        // RandomAccessFile access = null; 
         /*String line = null;  
 		  BufferedReader access= new BufferedReader(fileReader);
@@ -119,8 +119,13 @@ public class FieldListenerSpout implements IRichSpout {
 		int ch=0;
 		while(true){
 			byte[] b3=new byte[3];
-			try {				
+			try {
+				if(sock!=null &&sock.getKeepAlive())
 				 sock.getInputStream().read(b3,0,3);
+				else {
+					System.out.println("Error: Socket is reset! ");
+					sock.wait(5000);
+					break;}
 
 				if(b3==null){
 					System.out.println("read First 3 byte from socket failed ! ");
@@ -138,21 +143,33 @@ public class FieldListenerSpout implements IRichSpout {
 				}
 				 
 				String gpsString=SocketJava.DissectOneMessage(ch,bytelen);
+				//System.out.println("GPSstring="+gpsString);
 				String[] GPSRecord=null;
 				if(gpsString!=null){
 					GPSRecord =gpsString.split(TupleInfo.getDelimiter());
-				//System.out.print("GPS Record= :");
-//				for(int i=0;i<GPSRecord.length;i++)
-//				System.out.print(GPSRecord[i]+",");
+//					out=newGps[0]+","+newGps[3]+","+newGps[7]+","+newGps[5]+","+
+//				     newGps[6]+","+newGps[2]+","+newGps[1]+"\n";
+//					for(int i=0;i<GPSRecord.length-1;i++)
+//					writeToFile("/home/ghchen/gpsRecord",GPSRecord[i]+",");
+//					writeToFile("/home/ghchen/gpsRecord","\n");
+					
+					
+					//String[] emit=new String[tupleInfo.getFieldList().size()];
+
+					
+					
+					 //if (tupleInfo.getFieldList().size() == GPSRecord.length)
+				      //{
+				   //	_collector.emit(new Values(GPSRecord)); 
+						_collector.emit(new Values(GPSRecord[0],GPSRecord[3],GPSRecord[7],GPSRecord[5],
+						     GPSRecord[6] , GPSRecord[2],GPSRecord[1])); 
+				      //}
 				
 				}else{
 					break;
 					}
 				//System.out.print("  Size of GPS record = "+GPSRecord.length+"\n");
-				 if (tupleInfo.getFieldList().size() == GPSRecord.length)
-			      {
-			   	_collector.emit(new Values(GPSRecord)); 
-			      }
+		
 				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block

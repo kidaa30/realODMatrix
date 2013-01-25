@@ -75,7 +75,7 @@ public class DistrictMatchingBolt implements IRichBolt {
 			if(sects==null){
 			sects= new Sects(path);
 			}
-			
+			//System.out.println("District Match input:"+input.toString());
 			//FieldListenerSpout.writeToFile("/home/ghchen/output","District Match input:"+input.toString());
  
 			
@@ -110,6 +110,9 @@ public class DistrictMatchingBolt implements IRichBolt {
 			
 			String[] obToStrings=new String[inputLine.size()];
 			obToStrings=inputLine.toArray(obToStrings);
+//			for(int i=0;i<obToStrings.length-1;i++)
+//			FieldListenerSpout.writeToFile("/home/ghchen/map-oput",obToStrings[i]+",");
+//			FieldListenerSpout.writeToFile("/home/ghchen/map-oput","\n");
 			
 
 			_collector.emit(new Values(obToStrings));

@@ -50,7 +50,7 @@ public class realODMatrixTopology  {
 	        TopologyBuilder builder = new TopologyBuilder();
 	        
 	        builder.setSpout("spout", fieldListenerSpout,1);	        
-	        builder.setBolt("matchingBolt", districtMacthingBolt,2).shuffleGrouping("spout");
+	        builder.setBolt("matchingBolt", districtMacthingBolt,1).shuffleGrouping("spout");
 	        
 	        builder.setBolt("countBolt",countBolt,1).shuffleGrouping("matchingBolt"); 
 //	        builder.setBolt("dbBolt",dbWriterBolt,2).shuffleGrouping("countBolt");
