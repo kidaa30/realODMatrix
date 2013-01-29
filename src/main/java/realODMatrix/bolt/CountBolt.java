@@ -207,6 +207,7 @@ public class CountBolt implements IRichBolt {
 
 		Date nowDate=new Date();
 		SimpleDateFormat sdf2= new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
+		SimpleDateFormat sdf3= new SimpleDateFormat("yyyy-MM-dd");
 		int min=nowDate.getMinutes();
 		int second=nowDate.getSeconds();
 		if( (min%5) ==0 && (second==0) ){
@@ -221,7 +222,13 @@ public class CountBolt implements IRichBolt {
 				e.printStackTrace();
 			}
 			 
-			CountBolt.writeToFile("vehicleList-"+nowTime,d);
+			 String cur_dir=System.getProperty("user.dir");
+			 cur_dir=cur_dir+"/"+sdf3.format(nowDate);
+			 newFolder(cur_dir);
+			 
+			 cur_dir=cur_dir+"/"+"vehicleList-"+nowTime;
+			 
+			CountBolt.writeToFile(cur_dir,d);
 			
 		}
 		
@@ -312,6 +319,20 @@ public class CountBolt implements IRichBolt {
 			e1.printStackTrace();
 		}		
 	}
-
+	
+	 public static void newFolder(String folderPath) { 
+		    try { 
+		      String filePath = folderPath.toString(); 
+		      //filePath = filePath.toString(); 
+		      java.io.File myFilePath = new java.io.File(filePath); 
+		      if (!myFilePath.exists()) { 
+		        myFilePath.mkdir(); 
+		      } 
+		    } 
+		    catch (Exception e) { 
+		      System.out.println("Eorror: Can't create new folder!"); 
+		      e.printStackTrace(); 
+		    } 
+		  }
 
 }
