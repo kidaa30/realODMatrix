@@ -87,37 +87,41 @@ public class DistrictMatchingBolt implements IRichBolt {
 			record=new GPSRcrd(Double.parseDouble((String) inputLine.get(6)), 
 					Double.parseDouble((String) inputLine.get(5)), Integer.parseInt((String) inputLine.get(3)), 
 					Integer.parseInt((String) inputLine.get(4)));
+			
+			if(     Double.parseDouble((String) inputLine.get(6)) > 114.5692938 ||
+					Double.parseDouble((String) inputLine.get(6)) < 113.740000  ||
+					Double.parseDouble((String) inputLine.get(5)) > 22.839945   ||
+					Double.parseDouble((String) inputLine.get(5)) < 22.44
+					) return;
 
 
 			districtID = sects.fetchSect(record);
 			
-			if(districtID==-1)
-				//System.out.println("no sects contain this record");
-				return;
-			else
+			if(districtID!=-1)
 			{
 				System.out.println(count++ +": GPS Point falls into Sect No. :" + districtID);
 				//FieldListenerSpout.writeToFile("/home/ghchen/districtID","DistrictBolt GPS Point falls into Sect No. ::"+districtID.toString());
-					
+
+
+
+				inputLine.add(Integer.toString(districtID));			
+				//input.getFields().toList().add("districtID");
+				List<String> fieldList= input.getFields().toList();
+				fieldList.add("districtID");
+				matchBoltDeclare=new Fields(fieldList);
+				//FieldListenerSpout.writeToFile("/home/ghchen/output","matchBoltDeclare="+matchBoltDeclare);		
+
+
+				String[] obToStrings=new String[inputLine.size()];
+				obToStrings=inputLine.toArray(obToStrings);
+				//			for(int i=0;i<obToStrings.length-1;i++)
+				//			FieldListenerSpout.writeToFile("/home/ghchen/map-oput",obToStrings[i]+",");
+				//			FieldListenerSpout.writeToFile("/home/ghchen/map-oput","\n");
+
+
+				_collector.emit(new Values(obToStrings));
+				//_collector.emit(new Values(inputLine));
 			}
-			
-			inputLine.add(Integer.toString(districtID));			
-			//input.getFields().toList().add("districtID");
-			List<String> fieldList= input.getFields().toList();
-			fieldList.add("districtID");
-			matchBoltDeclare=new Fields(fieldList);
-			//FieldListenerSpout.writeToFile("/home/ghchen/output","matchBoltDeclare="+matchBoltDeclare);		
-
-			
-			String[] obToStrings=new String[inputLine.size()];
-			obToStrings=inputLine.toArray(obToStrings);
-//			for(int i=0;i<obToStrings.length-1;i++)
-//			FieldListenerSpout.writeToFile("/home/ghchen/map-oput",obToStrings[i]+",");
-//			FieldListenerSpout.writeToFile("/home/ghchen/map-oput","\n");
-			
-
-			_collector.emit(new Values(obToStrings));
-			//_collector.emit(new Values(inputLine));			
 
 		} catch (Exception e) {
 

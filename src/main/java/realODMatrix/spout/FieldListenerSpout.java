@@ -51,14 +51,10 @@ public class FieldListenerSpout implements IRichSpout {
     @Override
     public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) 
 		{
-		    _collector = collector;
-		    
+		    _collector = collector;		    
 		    
 				//sock=new Socket("172.20.14.204",15025);
-				System.out.println("This is open function in FieldSpout !");
- 
-
-		    
+				System.out.println("This is open function in FieldSpout !");		    
 /*		 String file=new String();
 			 if(file.equals(""))
 			 {

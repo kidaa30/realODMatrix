@@ -211,10 +211,18 @@ public class CountBolt implements IRichBolt {
 		int second=nowDate.getSeconds();
 		if( (min%5) ==0 && (second==0) ){
 			String nowTime=sdf2.format(nowDate);
-			 //LinkedList<District> d=new LinkedList<District> () ;
-			 //d=districts;			 
-			CountBolt.writeToFile("vehicleList-"+nowTime,districts);
-			districts.clear();
+			 LinkedList<District> d=new  LinkedList<District> (districts);
+			 districts.clear(); 
+			 
+			 try {
+				Thread.sleep(200);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			 
+			CountBolt.writeToFile("vehicleList-"+nowTime,d);
+			
 		}
 		
 //		timer=new Timer(true);
