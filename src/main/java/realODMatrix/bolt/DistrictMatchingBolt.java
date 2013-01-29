@@ -91,8 +91,9 @@ public class DistrictMatchingBolt implements IRichBolt {
 
 			districtID = sects.fetchSect(record);
 			
-			if(taskID==-1)
-				System.out.println("no sects contain this record");
+			if(districtID==-1)
+				//System.out.println("no sects contain this record");
+				return;
 			else
 			{
 				System.out.println(count++ +": GPS Point falls into Sect No. :" + districtID);

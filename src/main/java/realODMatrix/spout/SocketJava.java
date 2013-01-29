@@ -7,13 +7,11 @@
  */
 package main.java.realODMatrix.spout;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.nio.CharBuffer;
 import java.text.DecimalFormat;
+
 
 /**
  * realODMatrix main.java.realODMatrix.bolt test.java
@@ -26,41 +24,36 @@ import java.text.DecimalFormat;
 public class SocketJava {
 
 	// TODO Auto-generated method stub
-	private static final short POSINFO_PLATE_NUMBER			=		0x0001;
-	private static final short POSINFO_LONGITUDE			=		0x0002;
+	private static final short POSINFO_PLATE_NUMBER			=	0x0001;
+	private static final short POSINFO_LONGITUDE			=	0x0002;
 	private static final short POSINFO_LATITUDE				=	0x0003;
-	private static final short POSINFO_REPORT_TIME			=			0x0004;
+	private static final short POSINFO_REPORT_TIME			=	0x0004;
 	private static final short POSINFO_DEV_ID				=	0x0005;
 	private static final short POSINFO_SPEED				=	0x0006;
 	private static final short POSINFO_DIRECTION			=	0x0007;
-	private static final short	POSINFO_LOCATION_STATUS		=				0x0008;
+	private static final short	POSINFO_LOCATION_STATUS		=	0x0008;
 
-	private static final short ALARMINFO_SIM_NUMBER			=		0x0010;
-	private static final short ALARMINFO_CAR_STATUS			=		0x0011;
-	private static final short ALARMINFO_CAR_COLOUR			=		0x0012;
+	private static final short ALARMINFO_SIM_NUMBER			=	0x0010;
+	private static final short ALARMINFO_CAR_STATUS			=	0x0011;
+	private static final short ALARMINFO_CAR_COLOUR			=	0x0012;
 
 
-	static Socket sock ;
+	public static Socket sock ;
     static String GPSline=new String();
 	static  String out=new String();
+	static int failedCount=0;
+	static int unknownCount=0;
+
+
 	
+
 	@SuppressWarnings("unused")
-	public static void main(String[] args) throws Exception    {		
+	public static void main(String[] args) throws Exception    {	
+	
 
 		try {
+			if(sock==null)
 			sock=new Socket("172.20.14.204",15025);
-
-
-			//		int err=receive(sock);
-			//		if(err<0)
-			//		System.out.println("Socket failed !");
-			//		
-			//	}
-			//
-			//
-			//	
-			//	@SuppressWarnings("unused")
-			//	public static int receive(Socket sock) throws Exception { 
 
 			System.out.println("#---------连接成功，数据接收中.........\n");
 			System.out.println("#    .为一条位置信息\n");
@@ -70,42 +63,35 @@ public class SocketJava {
 			int count=0;
 			int ch=0;
 			while(true){
-				//			InputStreamReader streamReader = new InputStreamReader(sock.getInputStream());
-				//			BufferedReader reader = new BufferedReader(streamReader);
-				//			char[] b3=new char[3];
-				//			reader.read(b3);
-				//			byte[] b2=new byte[2];
-				//			ch=b3[0];
-				//			b2[0]=(byte) b3[1];
-				//			b2[1]=(byte) b3[2];
-				//			int len=bytesToShort(b2);
-				//			
-				//			char[] charlen=new char[len];
-				//
-				//			reader.read(charlen, 0, len);
-				//			byte[] bytelen=new byte[len];
-				//			for(int i=0;i<len;i++)
-				//				bytelen[i]=(byte)charlen[i];			
 
-				byte[] b3=new byte[3];
-				if(sock!=null )
-					sock.getInputStream().read(b3,0,3);
-				if(b3[0]==0 && b3[1]==0 && b3[0]==0){
-					System.out.println("read First 3 byte from socket failed ! ");
+				byte[] b3= new byte[3];
+				if(sock!=null ){
+					try{
+						sock.getInputStream().read(b3,0,3);
+						ch=b3[0];
+					}catch ( Exception e){
+						System.out.println("connection reset, reconnecting ...");
+						sock.close();
+						Thread.sleep(100);
+						sock=new Socket("172.20.14.204",15025);						
+					}
+
+				}else{
+					sock=new Socket("172.20.14.204",15025);	
 					break ;
-				}else
-					ch=b3[0];
+				}			
 
 				int len=bytesToShort(b3, 1);
+				if(len<0) break;
 				byte[] bytelen= new byte[len];
 				sock.getInputStream().read(bytelen);
 				if(bytelen==null){
 					System.out.println("read the second part from byte from socket failed ! ");
-					return ;
+					break ;
 				}
 
 				DissectOneMessage(ch,bytelen);
-				//System.out.println(count++ +":\n");
+			    System.out.println(count++ +":\n");
 			}
 
 		} catch (UnknownHostException e) {
@@ -132,7 +118,7 @@ public class SocketJava {
 		switch (ch) {
 		case 0x02:
 			//System.out.println("received GPS record ! len="+len+"\t");
-			System.out.println(".");
+			System.out.print(".");
 			String mm=DissectPositionInfo(msg, msg.length);
 			return mm ;
 		case 0x03:
@@ -144,13 +130,17 @@ public class SocketJava {
 			System.out.print("*");
 			break;
 		default:
-			System.out.println("@@@		Unknow unit code, unit code="+ch+"		@@@\n");
-			//if(sock!=null){sock.close();}
-			Thread.sleep(1000);
-			
-
-			 //sock = new Socket("172.20.14.204", 15025);
-
+			System.out.println("\n	@@@		Unknow unit code, unit code="+ch+"		@@@\n");
+			Thread.sleep(100);
+			unknownCount++;
+			System.out.println(unknownCount);
+			if(unknownCount>=3 ){
+				sock.close();
+				Thread.sleep(100);
+				System.out.println("Reconnecting ...");
+				sock = new Socket("172.20.14.204", 15025);
+				unknownCount=0;
+			}
 
 			break;
 		}	
@@ -170,7 +160,7 @@ public class SocketJava {
 
 		char tempchar=0;
 
-		while (offset<len-1)
+		while (offset<=len-2)
 		{
 			unit_id =bytesToShort(msg,offset);
 
@@ -295,7 +285,7 @@ public class SocketJava {
 				GPSline=GPSline+plate +"\n";
 				plate=null;			
 			
-				System.out.println("GPSline = "+GPSline);
+				//System.out.println("GPSline = "+GPSline);
 				return GPSline;
 				//String[] newGps=GPSline.split(",");
 				//System.out.println("newGps.length = "+newGps.length);
@@ -308,8 +298,16 @@ public class SocketJava {
 //				return out;
 								
 			default:
-				System.out.println("### 	Error: can't resort message info!   #### unit_id="+unit_id+"\n");
-				Thread.sleep(1000);
+				System.out.println("\n	### 	Error: can't resort message info!   #### unit_id="+unit_id+"\n");
+				Thread.sleep(100);	
+				failedCount++;
+				if(failedCount>=3 && sock!=null){
+					sock.close();
+					Thread.sleep(100);	
+					System.out.println("Reconnecting ...");
+					sock = new Socket("172.20.14.204", 15025);
+					failedCount=0;
+				}				
 				break;
 
 			}

@@ -53,18 +53,10 @@ public class FieldListenerSpout implements IRichSpout {
 		{
 		    _collector = collector;
 		    
-		    try {
-		    	if(sock==null){
-		    		sock=new Socket("172.20.14.204",15025);
-		    	}
-				
-			} catch (UnknownHostException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}   
+		    
+				//sock=new Socket("172.20.14.204",15025);
+				System.out.println("This is open function in FieldSpout !");
+ 
 
 		    
 /*		 String file=new String();
@@ -84,18 +76,15 @@ public class FieldListenerSpout implements IRichSpout {
 			}*/
 		    
 		}
-//	} catch (Exception e) {
-//		// TODO Auto-generated catch block
-//		e.printStackTrace();
-//	}
+
 
     @SuppressWarnings("unused")
 	@Override
     public void nextTuple() {    	
-   
-        Utils.sleep(1000);
-       // RandomAccessFile access = null; 
-        /*String line = null;  
+
+    	//Utils.sleep(1000);
+    	// RandomAccessFile access = null; 
+    	/*String line = null;  
 		  BufferedReader access= new BufferedReader(fileReader);
            try 
            {  		   
@@ -106,7 +95,7 @@ public class FieldListenerSpout implements IRichSpout {
                   	   for (int i=0;i<3;i++) {System.out.println("\n");}
 							GPSRecord =line.split(tupleInfo.getDelimiter());
 						     //       line.split("\\"+tupleInfo.getDelimiter());							
-						
+
                         if (tupleInfo.getFieldList().size() == GPSRecord.length)
                            {
                         	_collector.emit(new Values(GPSRecord)); 
@@ -114,88 +103,69 @@ public class FieldListenerSpout implements IRichSpout {
                            }                          
                    }          
                } */
-	    
-		int count=0;
-		int ch=0;
-		while(true){
-			byte[] b3=new byte[3];
-			try {
-				if(sock!=null &&sock.getKeepAlive())
-				 sock.getInputStream().read(b3,0,3);
-				else {
-					System.out.println("Error: Socket is reset! ");
-					sock.wait(5000);
-					break;}
 
-				if(b3==null){
-					System.out.println("read First 3 byte from socket failed ! ");
-					break;
-				}else{
-				ch=b3[0];}				
-				//System.out.println("ch="+ch);
-				int len=SocketJava.bytesToShort(b3, 1);
-				//System.out.println("len="+len);
-				byte[] bytelen= new byte[len];
-				sock.getInputStream().read(bytelen);
-				if(bytelen==null){
-					System.out.println("read the second part from byte from socket failed ! ");
-					break;
-				}
-				 
-				String gpsString=SocketJava.DissectOneMessage(ch,bytelen);
-				//System.out.println("GPSstring="+gpsString);
-				String[] GPSRecord=null;
-				if(gpsString!=null){
-					GPSRecord =gpsString.split(TupleInfo.getDelimiter());
-//					out=newGps[0]+","+newGps[3]+","+newGps[7]+","+newGps[5]+","+
-//				     newGps[6]+","+newGps[2]+","+newGps[1]+"\n";
-//					for(int i=0;i<GPSRecord.length-1;i++)
-//					writeToFile("/home/ghchen/gpsRecord",GPSRecord[i]+",");
-//					writeToFile("/home/ghchen/gpsRecord","\n");
-					
-					
-					//String[] emit=new String[tupleInfo.getFieldList().size()];
-
-					
-					
-					 //if (tupleInfo.getFieldList().size() == GPSRecord.length)
-				      //{
-				   //	_collector.emit(new Values(GPSRecord)); 
-						_collector.emit(new Values(GPSRecord[0],GPSRecord[3],GPSRecord[7],GPSRecord[5],
-						     GPSRecord[6] , GPSRecord[2],GPSRecord[1])); 
-				      //}
-				
-				}else{
-					break;
+    	int count=0;
+    	int ch=0;
+    	int err=0;
+    	try {
+    		if(sock==null){
+    			sock=new Socket("172.20.14.204",15025);}
+    		while(true){
+				byte[] b3= new byte[3];
+				if(sock!=null ){
+					try{
+						sock.getInputStream().read(b3,0,3);
+						ch=b3[0];
+					}catch ( Exception e){
+						System.out.println("connection reset, reconnecting ...");
+						sock.close();
+						Thread.sleep(100);
+						sock=new Socket("172.20.14.204",15025);						
 					}
-				//System.out.print("  Size of GPS record = "+GPSRecord.length+"\n");
-		
-				
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}	
-			
-		}
 
-							
-	
-  
-       //tupleInfo = new TupleInfo(GPSRecord); 
-        
-              
-//               if(line==-1){
-//            	  System.out.println("Storm has reached the end of file /home/ghchen/GPS_2011_09_27.txt !");             	   
-//               }
-//          } 
-//          catch (IOException ex) {
-//        	  throw new RuntimeException("error:fail to read from file /home/ghchen/GPS_2011_09_27.txt",ex);  
- 	  		
-        
-           
+				}else{
+					sock=new Socket("172.20.14.204",15025);	
+					break ;
+				}
+    			int len=SocketJava.bytesToShort(b3, 1);
+    			if(len<0) break;
+    			byte[] bytelen= new byte[len];
+    			sock.getInputStream().read(bytelen);
+    			if(bytelen==null){
+    				System.out.println("read the second part from byte from socket failed ! ");
+    				break;
+    			}
+    			sock.getInputStream().markSupported();
+    			sock.getInputStream().mark(3);
+
+    			String gpsString=SocketJava.DissectOneMessage(ch,bytelen);
+    			//System.out.println("GPSstring="+gpsString);
+    			String[] GPSRecord=null;
+    			if(gpsString!=null){
+    				GPSRecord =gpsString.split(TupleInfo.getDelimiter());
+    				//					for(int i=0;i<GPSRecord.length-1;i++)
+    				//					writeToFile("/home/ghchen/gpsRecord",GPSRecord[i]+",");
+    				//					writeToFile("/home/ghchen/gpsRecord","\n");					
+
+    				_collector.emit(new Values(GPSRecord[0],GPSRecord[3],GPSRecord[7],GPSRecord[5],
+    						GPSRecord[6] , GPSRecord[2],GPSRecord[1])); 
+    				//}
+
+    			}else{
+    				break;
+    			}
+
+    		}	
+    	} catch (IOException e) {
+    		// TODO Auto-generated catch block
+    		e.printStackTrace();
+    	} catch (Exception e) {
+    		// TODO Auto-generated catch block
+    		e.printStackTrace();
+    	}	
+
+
+
     }        
 
     @Override
