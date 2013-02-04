@@ -25,6 +25,8 @@ import backtype.storm.tuple.Tuple;
 import java.util.List;
 
 import java.util.Timer;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 /**
@@ -202,15 +204,10 @@ public class CountBolt implements IRichBolt {
 		int second=nowDate.getSeconds();
 		if( (min%5) ==0 && (second==0) ){
 			String nowTime=sdf2.format(nowDate);
-			 LinkedList<District> d=new  LinkedList<District> (districts);
-			 districts.clear(); 
-			 
-			 try {
-				Thread.sleep(200);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+
+			    
+			LinkedList<District> d=new  LinkedList<District> (districts);
+			districts.clear();
 			 
 			 String cur_dir=System.getProperty("user.dir");
 			 cur_dir=cur_dir+"/"+sdf3.format(nowDate);
@@ -219,6 +216,13 @@ public class CountBolt implements IRichBolt {
 			 cur_dir=cur_dir+"/"+"vehicleList-"+nowTime;
 			 
 			CountBolt.writeToFile(cur_dir,d);
+			
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			
 		}
 		
