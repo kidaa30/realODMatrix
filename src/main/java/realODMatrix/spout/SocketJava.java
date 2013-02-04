@@ -11,6 +11,10 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import main.java.realODMatrix.bolt.CountBolt;
 
 
 /**
@@ -283,7 +287,27 @@ public class SocketJava {
 				plate=new String(unit_value,"GBK");
 				//System.out.println("	Car Color:"+plate+"\n");
 				GPSline=GPSline+plate +"\n";
-				plate=null;			
+				plate=null;		
+				
+				SimpleDateFormat sdf2= new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
+				SimpleDateFormat sdf3= new SimpleDateFormat("yyyy-MM-dd");
+				SimpleDateFormat sdf4= new SimpleDateFormat("yyyy-MM-dd-HH-");
+				df2.applyPattern("00"); 
+				
+				Date nowDate=new Date();
+				String nowTime=sdf2.format(nowDate);
+				 String cur_dir=System.getProperty("user.dir");				 
+				 String path=cur_dir+"/rawGPSData/"+sdf3.format(nowDate);
+				 CountBolt.newFolder(path);
+				
+				int min=nowDate.getMinutes();
+				int second=nowDate.getSeconds();
+				if(min<30 ){min=00;second=00;	}
+				else if(min>=30){min=30;second=00;}
+				path=cur_dir+"/rawGPSData/"+sdf3.format(nowDate)+"/"+sdf4.format(nowDate)+df2.format(min)+"-"+df2.format(second);
+				 
+				FieldListenerSpout.writeToFile(path,GPSline);
+				
 			
 				//System.out.println("GPSline = "+GPSline);
 				return GPSline;

@@ -212,14 +212,14 @@ public class FieldListenerSpout implements IRichSpout {
 	static int count=0;
 	public static void writeToFile(String fileName, Object obj){
 		try {
-			count=count+1;
+			//count=count+1;
 			FileWriter fwriter;
 			fwriter= new FileWriter(fileName,true);
 		     BufferedWriter writer= new BufferedWriter(fwriter);
 		      
-		      	writer.write(count+": "+obj.toString());
+		      	writer.write(obj.toString());
 
-		      writer.write("\n\n");
+		      //writer.write("\n\n");
 		      writer.close(); 
 				
 		} catch (IOException e1) {

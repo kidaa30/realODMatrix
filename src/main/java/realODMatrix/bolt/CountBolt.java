@@ -12,27 +12,17 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.TimerTask;
-
-
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.IRichBolt;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
-import backtype.storm.tuple.Values;
 import java.util.List;
-
-import main.java.realODMatrix.spout.FieldListenerSpout;
-import main.java.realODMatrix.spout.TupleInfo;
-import main.java.realODMatrix.struct.GPSRcrd;
 
 import java.util.Timer;
 
@@ -63,7 +53,7 @@ public class CountBolt implements IRichBolt {
 	String taskName;
 	//Map<String, List<String> > districts; //DistrictID, vehicleIdsInThisArea
 	public  LinkedList<District>  districts = new  LinkedList<District>();
-	List<String> vehicleIdsInThisArea=new ArrayList<String>(); 
+	//static public List<String> vehicleIdsInThisArea=new ArrayList<String>(); 
 	Integer cnt;
 	Timer timer;
 	
