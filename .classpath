@@ -176,5 +176,7 @@
 	<classpathentry kind="lib" path="D:/siat-code/realODMatrix/lib/geotools-8.5/xml-commons-resolver-1.2.jar"/>
 	<classpathentry kind="lib" path="D:/siat-code/realODMatrix/lib/geotools-8.5/xpp3_min-1.1.4c.jar"/>
 	<classpathentry kind="lib" path="D:/siat-code/realODMatrix/lib/geotools-8.5/xsd-2.6.0.jar"/>
+	<classpathentry kind="lib" path="D:/siat-code/lib/hbase-0.94.4.jar" sourcepath="D:/siat-code/lib/hbase-src-0.94.4.zip"/>
+	<classpathentry kind="lib" path="D:/siat-code/lib/hadoop-core-1.0.4.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

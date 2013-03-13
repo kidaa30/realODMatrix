@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
+import main.java.realODMatrix.bolt.ToHbase;
 
 /**
  * realODMatrix realODMatrix.bolt CountBolt.java
@@ -214,12 +214,16 @@ public class CountBolt implements IRichBolt {
 			 newFolder(cur_dir);
 			 
 			 cur_dir=cur_dir+"/"+"vehicleList-"+nowTime;
-			 
+		try {
 			CountBolt.writeToFile(cur_dir,d);
+			ToHbase.writeToHbase("realOD2Hbase", nowTime, d);
+			Thread.sleep(1000);
 			
-			try {
-				Thread.sleep(1000);
+			d.clear();
 			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -307,7 +311,7 @@ public class CountBolt implements IRichBolt {
               }*/
 		      br.flush();
 		      br.close();		      
-        	  districts.clear();				
+        	 // districts.clear();				
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
