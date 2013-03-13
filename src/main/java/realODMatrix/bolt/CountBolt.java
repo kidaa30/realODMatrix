@@ -202,7 +202,7 @@ public class CountBolt implements IRichBolt {
 		SimpleDateFormat sdf3= new SimpleDateFormat("yyyy-MM-dd");
 		int min=nowDate.getMinutes();
 		int second=nowDate.getSeconds();
-		if( (min%5) ==0 && (second==0) ){
+		if( (min%2) ==0 && (second==0) ){
 			String nowTime=sdf2.format(nowDate);
 
 			    
