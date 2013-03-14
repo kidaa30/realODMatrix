@@ -54,7 +54,7 @@ public class FieldListenerSpout implements IRichSpout {
 		    _collector = collector;		    
 		    
 				//sock=new Socket("172.20.14.204",15025);
-				System.out.println("This is open function in FieldSpout !");		    
+				//System.out.println("This is open function in FieldSpout !");		    
 /*		 String file=new String();
 			 if(file.equals(""))
 			 {
@@ -88,7 +88,7 @@ public class FieldListenerSpout implements IRichSpout {
                { 
                    if (line !=null)
                    {
-                  	   for (int i=0;i<3;i++) {System.out.println("\n");}
+                  	   
 							GPSRecord =line.split(tupleInfo.getDelimiter());
 						     //       line.split("\\"+tupleInfo.getDelimiter());							
 

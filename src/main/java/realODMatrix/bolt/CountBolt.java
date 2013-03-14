@@ -27,6 +27,10 @@ import java.util.List;
 import java.util.Timer;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.HBaseConfiguration;
+
 import main.java.realODMatrix.bolt.ToHbase;
 
 /**
@@ -58,6 +62,8 @@ public class CountBolt implements IRichBolt {
 	//static public List<String> vehicleIdsInThisArea=new ArrayList<String>(); 
 	Integer cnt;
 	Timer timer;
+	static Configuration conf=null ;
+	static HBaseHelper helper=null;
 	
 	public class District 
 	{
@@ -129,7 +135,8 @@ public class CountBolt implements IRichBolt {
 		// TODO Auto-generated method stub
 		this.taskName = context.getThisComponentId();
 		this.taskId = context.getThisTaskId();
-		this._collector = collector;		
+		this._collector = collector;
+	
 	}
 
 	
@@ -214,9 +221,16 @@ public class CountBolt implements IRichBolt {
 			 newFolder(cur_dir);
 			 
 			 cur_dir=cur_dir+"/"+"vehicleList-"+nowTime;
+			 CountBolt.writeToFile(cur_dir,d);
 		try {
-			CountBolt.writeToFile(cur_dir,d);
-			ToHbase.writeToHbase("realOD2Hbase", nowTime, d);
+			
+			if(helper==null){
+					conf = HBaseConfiguration.create() ;
+					helper= HBaseHelper.getHelper(conf);
+					ToHbase.writeToHbase(helper,"realOD2Hbase", nowTime, d);
+			 }else{
+			   ToHbase.writeToHbase(helper,"realOD2Hbase", nowTime, d);
+			 }
 			Thread.sleep(1000);
 			
 			d.clear();
@@ -287,6 +301,7 @@ public class CountBolt implements IRichBolt {
               for(District d:districts){
 //            	  br.write(d.districtId+","+d.count+"#"+d.viechleIDList.values()+";"+
 //                    d.vieLngLatIDList.values()+"\n"); 
+            	if(d.count>=10){
             	  br.write(d.districtId+","+d.count+"#");
           		for(Map.Entry<String,Date> entry : d.viechleIDList.entrySet()){   //
           			String lonLanString=d.vieLngLatIDList.get(entry.getKey()); 
@@ -295,7 +310,7 @@ public class CountBolt implements IRichBolt {
          			System.out.println(entry.getKey()+","+entry.getValue()+","+lonLanString+";");
           			}
           		br.write("\r\n");
-
+            	
           		//System.out.println("\n");
               }         
            
@@ -310,6 +325,7 @@ public class CountBolt implements IRichBolt {
             	  }
               }*/
 		      br.flush();
+              }
 		      br.close();		      
         	 // districts.clear();				
 		} catch (IOException e1) {

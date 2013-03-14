@@ -159,9 +159,9 @@ public class ToHbase {
 		    } 
 		  }
 
-	public static void writeToHbase(String tableName, String Time,LinkedList<District> districts) throws IOException {
-		Configuration conf = HBaseConfiguration.create() ;
-		HBaseHelper helper= HBaseHelper.getHelper(conf);
+	public static void writeToHbase(HBaseHelper helper,String tableName, String Time,LinkedList<District> districts) throws IOException {
+		//Configuration conf = HBaseConfiguration.create() ;
+		//HBaseHelper helper= HBaseHelper.getHelper(conf);
 		 SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		if (!helper.existsTable(tableName)) { 
 
@@ -170,12 +170,12 @@ public class ToHbase {
 
 		else System.out.println("\n\n Hbasetest: Table named \"testTable\" exist ! " );
 
-		HTable table = new HTable(conf, tableName);                    // co GetExample-2-NewTable Instantiate a new table reference.  
 
 
 		for(District d:districts){
 			String row=Time+"_"+d.districtId;
 			Integer count=d.count;
+			if(count>=10){
 			String gpsRcd=new String();	
 			for(Entry<String, Date> entry : d.viechleIDList.entrySet()){   //
 				String lonLanString=d.vieLngLatIDList.get(entry.getKey()); 
@@ -184,7 +184,8 @@ public class ToHbase {
 			}
 			helper.put(tableName, row, "cntFamily", "count",count.toString() );
 			helper.put(tableName, row, "RecordFamily", "vehicleRecord",gpsRcd ); 
-
+			}
+/*			HTable table = new HTable(conf, tableName);                    // co GetExample-2-NewTable Instantiate a new table reference.  
 			Get get = new Get(Bytes.toBytes(row));                             // co GetExample-3-NewGet Create get with specific row.  
 			get.addColumn(Bytes.toBytes("cntFamily"), Bytes.toBytes("count")); // co GetExample-4-AddCol Add a column to the get.  
 			get.addColumn(Bytes.toBytes("RecordFamily"), Bytes.toBytes("vehicleRecord"));
@@ -192,7 +193,7 @@ public class ToHbase {
 			byte[] val = result.getValue(Bytes.toBytes("cntFamily"), Bytes.toBytes("count")); // co GetExample-6-GetValue Get a specific value for the given column.  
 			System.out.print("Count: " + Bytes.toString(val));               // co GetExample-7-Print 
 			val = result.getValue(Bytes.toBytes("RecordFamily"), Bytes.toBytes("vehicleRecord")); 
-			System.out.println("Vehicle List: " + Bytes.toString(val));
+			System.out.println("Vehicle List: " + Bytes.toString(val));*/
 
 		}
 

@@ -99,7 +99,7 @@ public class DistrictMatchingBolt implements IRichBolt {
 			
 			if(districtID!=-1)
 			{
-				System.out.println(count++ +": GPS Point falls into Sect No. :" + districtID);
+				//System.out.println(count++ +": GPS Point falls into Sect No. :" + districtID);
 				//FieldListenerSpout.writeToFile("/home/ghchen/districtID","DistrictBolt GPS Point falls into Sect No. ::"+districtID.toString());
 
 
