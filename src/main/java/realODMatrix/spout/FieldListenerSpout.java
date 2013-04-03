@@ -39,7 +39,7 @@ public class FieldListenerSpout implements IRichSpout {
     //private TopologyContext context;
     //private String file="/home/ghchen/2013-01-05.1/2013-01-05--11_05_48.txt";
     private TupleInfo tupleInfo=new TupleInfo();
-    
+    String[] GPSRecord;
     //Fields fields;
     
     static Socket sock=null;
@@ -55,10 +55,11 @@ public class FieldListenerSpout implements IRichSpout {
 		    
 				//sock=new Socket("172.20.14.204",15025);
 				//System.out.println("This is open function in FieldSpout !");		    
-/*		 String file=new String();
+		 String file=new String();
 			 if(file.equals(""))
 			 {
-				file="/home/ghchen/GPS_2011_09_27.txt";
+				//file="/home/ghchen/GPS_2011_09_27.txt";
+				 file="D:\\siat-code\\GPS_2011_09_27-5000line.txt";
 			 }
 			 
 		try 
@@ -69,7 +70,7 @@ public class FieldListenerSpout implements IRichSpout {
 		catch (FileNotFoundException e) 
 			{
 				throw new RuntimeException ("error reading file ["+file+"]");
-			}*/
+			}
 		    
 		}
 
@@ -80,7 +81,7 @@ public class FieldListenerSpout implements IRichSpout {
 
     	//Utils.sleep(1000);
     	// RandomAccessFile access = null; 
-    	/*String line = null;  
+    	String line = null;  
 		  BufferedReader access= new BufferedReader(fileReader);
            try 
            {  		   
@@ -98,9 +99,9 @@ public class FieldListenerSpout implements IRichSpout {
                             //tupleInfo = new TupleInfo(GPSRecord);              
                            }                          
                    }          
-               } */
+               } 
 
-    	int count=0;
+ /*   	int count=0;
     	int ch=0;
     	int err=0;
     	try {
@@ -151,7 +152,8 @@ public class FieldListenerSpout implements IRichSpout {
     				break;
     			}
 
-    		}	
+    		}	*/
+    		
     	} catch (IOException e) {
     		// TODO Auto-generated catch block
     		e.printStackTrace();

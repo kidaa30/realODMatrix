@@ -25,6 +25,7 @@ import backtype.storm.tuple.Tuple;
 import java.util.List;
 
 import java.util.Timer;
+import java.util.Map.Entry;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -50,8 +51,8 @@ public class CountBolt implements IRichBolt {
 	double lanLast;   // last location of the vehicle
 	double lonLast;
 	Date dateTimeLast=null;
-	int INTERVAL0 = 120; // We set time windows between two points 120 seconds;
-	double DIST0=0.008993;  //  On the Earth, 1 Degree =111.2 km 
+	int INTERVAL0 = 120/2; // We set time windows between two points 120 seconds;
+	double DIST0=0.008993/2;  //  On the Earth, 1 Degree =111.2 km 
 	                        //Distance between two points 1km, shoule be 1/111.2 =0.008993 Degree;
 	
 	private OutputCollector _collector;	
@@ -64,6 +65,7 @@ public class CountBolt implements IRichBolt {
 	Timer timer;
 	static Configuration conf=null ;
 	static HBaseHelper helper=null;
+	//public Map<String,String> lastDrictMap=new HashMap<String, String>();  //DistrictID, vID
 	
 	public class District 
 	{
@@ -126,9 +128,7 @@ public class CountBolt implements IRichBolt {
 		}
     	return false;
     }
-	
-	
-	
+    
 	@Override
 	public void prepare(Map stormConf, TopologyContext context,
 			OutputCollector collector) {
@@ -145,8 +145,8 @@ public class CountBolt implements IRichBolt {
 	public void execute(Tuple input) {
 		
 		String districtID = input.getValues().get(7).toString();
-		double lan = Double.parseDouble(input.getValues().get(5).toString());//绾害
-		double lon = Double.parseDouble(input.getValues().get(6).toString()); //缁忓害
+		double lan = Double.parseDouble(input.getValues().get(5).toString());//
+		double lon = Double.parseDouble(input.getValues().get(6).toString()); //
 		String viechId = input.getValues().get(0).toString();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		Date dateTime = null;
@@ -222,12 +222,19 @@ public class CountBolt implements IRichBolt {
 			 
 			 cur_dir=cur_dir+"/"+"vehicleList-"+nowTime;
 			 CountBolt.writeToFile(cur_dir,d);
-		try {
+			 d.clear();
+			 try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+/*		try {
 			
 			if(helper==null){
 					conf = HBaseConfiguration.create() ;
 					helper= HBaseHelper.getHelper(conf);
-					ToHbase.writeToHbase(helper,"realOD2Hbase", nowTime, d);
+					//ToHbase.writeToHbase(helper,"realOD2Hbase", nowTime, d);
 			 }else{
 			   ToHbase.writeToHbase(helper,"realOD2Hbase", nowTime, d);
 			 }
@@ -241,7 +248,7 @@ public class CountBolt implements IRichBolt {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+			*/
 		}
 		
 //		timer=new Timer(true);
@@ -292,61 +299,55 @@ public class CountBolt implements IRichBolt {
         }  
     } 
     
-	public static void writeToFile(String fileName, LinkedList<District> districts){
-		try {
-              BufferedWriter br = new BufferedWriter(new FileWriter(fileName,true));
-     		  SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//				String nowtime=sdf.format(new Date());
-     		  // ddDistrict=districts;
-              for(District d:districts){
-//            	  br.write(d.districtId+","+d.count+"#"+d.viechleIDList.values()+";"+
-//                    d.vieLngLatIDList.values()+"\n"); 
-            	if(d.count>=10){
-            	  br.write(d.districtId+","+d.count+"#");
-          		for(Map.Entry<String,Date> entry : d.viechleIDList.entrySet()){   //
-          			String lonLanString=d.vieLngLatIDList.get(entry.getKey()); 
-          			//if(entry.getKey()!=null && entry.getValue()!=null && lonLanString!=null)
-          			br.write(entry.getKey()+","+sdf.format(entry.getValue()) +","+lonLanString+";");
-         			System.out.println(entry.getKey()+","+entry.getValue()+","+lonLanString+";");
-          			}
-          		br.write("\r\n");
-            	
-          		//System.out.println("\n");
-              }         
-           
-              /*for(District d : districts){
-               	  br.write(d.districtId + ","+ d.count + "#");
-            	  HashMap<String ,String> viechIds = d.vieLngLatIDList;
-            	  Set<String> set = viechIds.keySet();
-            	  Iterator<String> iterator = set.iterator();
-            	  while(iterator.hasNext()){
-            		  String id = iterator.next();
-            		  br.write(id+"    ");
-            	  }
-              }*/
-		      br.flush();
-              }
-		      br.close();		      
-        	 // districts.clear();				
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}		
-	}
-	
-	 public static void newFolder(String folderPath) { 
-		    try { 
-		      String filePath = folderPath.toString(); 
-		      //filePath = filePath.toString(); 
-		      java.io.File myFilePath = new java.io.File(filePath); 
-		      if (!myFilePath.exists()) { 
-		        myFilePath.mkdir(); 
-		      } 
-		    } 
-		    catch (Exception e) { 
-		      System.out.println("Eorror: Can't create new folder!"); 
-		      e.printStackTrace(); 
-		    } 
-		  }
+    public static void writeToFile(String fileName, LinkedList<District> districts){
+    	try {
+    		BufferedWriter br = new BufferedWriter(new FileWriter(fileName,true));
+    		SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    		//				String nowtime=sdf.format(new Date());
+    		// ddDistrict=districts;
+    		for(District d:districts){
+    			//            	  br.write(d.districtId+","+d.count+"#"+d.viechleIDList.values()+";"+
+    			//                    d.vieLngLatIDList.values()+"\n"); 
+    			if(d.count>0){
+    				br.write("\n"+d.districtId+","+d.count+"#");
+    				br.flush();
+    				for(Map.Entry<String,Date> entry : d.viechleIDList.entrySet()){   //
+    					String lonLanString=d.vieLngLatIDList.get(entry.getKey()); 
+    					//if(entry.getKey()!=null && entry.getValue()!=null && lonLanString!=null)
+    					br.write(entry.getKey()+","+sdf.format(entry.getValue()) +","+lonLanString+";");
+    					br.flush();
+    					System.out.println(entry.getKey()+","+entry.getValue()+","+lonLanString+";");
+    				}
+    				//br.flush();
+//    				br.write("\r\n");
+//    				br.flush();
+
+    				//System.out.println("\n");
+    			}         
+
+    			
+    		}
+    		br.close();		      
+    		// districts.clear();				
+    	} catch (IOException e1) {
+    		// TODO Auto-generated catch block
+    		e1.printStackTrace();
+    	}		
+    }
+
+    public static void newFolder(String folderPath) { 
+    	try { 
+    		String filePath = folderPath.toString(); 
+    		//filePath = filePath.toString(); 
+    		java.io.File myFilePath = new java.io.File(filePath); 
+    		if (!myFilePath.exists()) { 
+    			myFilePath.mkdir(); 
+    		} 
+    	} 
+    	catch (Exception e) { 
+    		System.out.println("Eorror: Can't create new folder!"); 
+    		e.printStackTrace(); 
+    	} 
+    }
 
 }

@@ -175,7 +175,7 @@ public class ToHbase {
 		for(District d:districts){
 			String row=Time+"_"+d.districtId;
 			Integer count=d.count;
-			if(count>=10){
+			if(count>=0){
 			String gpsRcd=new String();	
 			for(Entry<String, Date> entry : d.viechleIDList.entrySet()){   //
 				String lonLanString=d.vieLngLatIDList.get(entry.getKey()); 

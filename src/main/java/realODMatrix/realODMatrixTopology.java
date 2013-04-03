@@ -7,24 +7,23 @@
  */
 package main.java.realODMatrix;
 
-import java.util.List;
-import java.util.Map;
-
 import backtype.storm.Config;
 import backtype.storm.LocalCluster;
 import backtype.storm.StormSubmitter;
 import backtype.storm.generated.AlreadyAliveException;
 import backtype.storm.generated.InvalidTopologyException;
-import backtype.storm.generated.StormTopology;
-import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.TopologyBuilder;
 import backtype.storm.tuple.Fields;
-import main.java.realODMatrix.bolt.CountBolt;
-import main.java.realODMatrix.bolt.DistrictMatchingBolt;
+
 //import main.java.realODMatrix.bolt.CountBolt;
 //import main.java.realODMatrix.bolt.DBWritterBolt;
 //import main.java.realODMatrix.bolt.DistrictMatchingBolt;
 import main.java.realODMatrix.spout.FieldListenerSpout;
+import main.java.realODMatrix.spout.SocketSpout;
+import main.java.realODMatrix.bolt.CountBolt;
+import main.java.realODMatrix.bolt.CountBolt2;
+import main.java.realODMatrix.bolt.DistrictMatchingBolt;
+
 
 /**
  * realODMatrix realODMatrix realODMatrixTopology.java
@@ -42,22 +41,29 @@ public class realODMatrixTopology  {
 		// TODO Auto-generated method stub
 		
 		FieldListenerSpout fieldListenerSpout = new FieldListenerSpout();
-		
+		SocketSpout socketSpout=new SocketSpout();
 		DistrictMatchingBolt districtMacthingBolt=new DistrictMatchingBolt(); 
-		CountBolt countBolt =new CountBolt();
+		CountBolt2 countBolt =new CountBolt2();
 //		DBWritterBolt dbWriterBolt = new DBWritterBolt();	
 		
 	        
 	        TopologyBuilder builder = new TopologyBuilder();
 	        
-	        builder.setSpout("spout", fieldListenerSpout,1);	        
-	        builder.setBolt("matchingBolt", districtMacthingBolt,8).shuffleGrouping("spout");	        
+	        //builder.setSpout("spout", fieldListenerSpout,1);	 
+	        builder.setSpout("spout", socketSpout,1);	 
+	        builder.setBolt("matchingBolt", districtMacthingBolt,7).shuffleGrouping("spout");	        
 	       // builder.setBolt("countBolt",countBolt,6).shuffleGrouping("matchingBolt"); 
-	        builder.setBolt("countBolt",countBolt,6).fieldsGrouping("matchingBolt",new Fields("districtID")); 
+	        builder.setBolt("countBolt",countBolt,8).fieldsGrouping("matchingBolt",new Fields("districtID")); 
 	       //builder.setBolt("dbBolt",dbWriterBolt,2).shuffleGrouping("countBolt");
 		    Config conf = new Config();
+
+            if(args.length==0){
+		    	args=new String[1];
+		    	args[0]="realOD";
+            }	
+		    
 	        if(args!=null && args.length > 0) {
-	            conf.setNumWorkers(15);            
+	            conf.setNumWorkers(16);            
 
 	            //LocalCluster  cluster= new LocalCluster();
 	            //cluster.submitTopology(args[0], conf, builder.createTopology());
@@ -66,10 +72,9 @@ public class realODMatrixTopology  {
 	        else {     
 	              
 	              conf.setDebug(true);
-	              conf.setMaxTaskParallelism(3);
+	              conf.setMaxTaskParallelism(16);
 	              LocalCluster cluster = new LocalCluster();
-	              cluster.submitTopology(
-	              "Threshold_Test", conf, builder.createTopology());
+	              cluster.submitTopology("realOD", conf, builder.createTopology());
 	    	      Thread.sleep(3000);
 	    	      cluster.shutdown(); 
 	        }

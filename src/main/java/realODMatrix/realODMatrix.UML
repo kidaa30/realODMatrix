@@ -2,7 +2,7 @@
 
  title <size:28>Real Time Origin-Destination Diagram\n <size:18> xdata@SIAT 2013-01-08 
 
-note left of realODMatrixTopology: start from here
+
 
 class realODMatrixTopology {
 	+void main(String[] args)
@@ -27,7 +27,7 @@ class realODMatrixTopology {
 }
 abstract class BaseRichSpout {
 }
-BaseRichSpout <|-- FieldListenerSpout
+BaseRichSpout <|.. FieldListenerSpout
 
  FieldListenerSpout--> DistrictMatchingBolt: tuple >
 
@@ -45,7 +45,7 @@ IRichBolt <|.. DistrictMatchingBolt
 
 
 
-DistrictMatchingBolt-> CountBolt:tuple >
+DistrictMatchingBolt--> CountBolt:tuple >
 
 
 
@@ -62,22 +62,14 @@ IRichBolt <|.. CountBolt
 
 
 
-DBWritterBolt <-- CountBolt: tuple <
+ CountBolt --> WebEnd : tuple >
 
-class DBWritterBolt {
-	+void prepare(Map stormConf, TopologyContext context, OutputCollector collector)
-	+void execute(Tuple input)
-	+void cleanup()
-	+void declareOutputFields(OutputFieldsDeclarer declarer)
-	+Map<String,Object> getComponentConfiguration()
+class WebEnd{
+  + realTimeODRefresh
+  + userInteractiveQuery
 }
-interface IRichBolt {
-}
-IRichBolt <|.. DBWritterBolt
 
-class  WebsiteFrontEnd
 
-WebsiteFrontEnd <-- DBWritterBolt
 
 class TupleInfo {
 	-String viechleID
