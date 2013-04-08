@@ -22,6 +22,7 @@ import main.java.realODMatrix.spout.FieldListenerSpout;
 import main.java.realODMatrix.spout.SocketSpout;
 import main.java.realODMatrix.bolt.CountBolt;
 import main.java.realODMatrix.bolt.CountBolt2;
+import main.java.realODMatrix.bolt.CountBolt3;
 import main.java.realODMatrix.bolt.DistrictMatchingBolt;
 
 
@@ -43,7 +44,8 @@ public class realODMatrixTopology  {
 		FieldListenerSpout fieldListenerSpout = new FieldListenerSpout();
 		SocketSpout socketSpout=new SocketSpout();
 		DistrictMatchingBolt districtMacthingBolt=new DistrictMatchingBolt(); 
-		CountBolt2 countBolt =new CountBolt2();
+		CountBolt3 countBolt3 =new CountBolt3();
+		CountBolt2 countBolt2 =new CountBolt2();
 //		DBWritterBolt dbWriterBolt = new DBWritterBolt();	
 		
 	        
@@ -51,10 +53,11 @@ public class realODMatrixTopology  {
 	        
 	        //builder.setSpout("spout", fieldListenerSpout,1);	 
 	        builder.setSpout("spout", socketSpout,1);	 
-	        builder.setBolt("matchingBolt", districtMacthingBolt,7).shuffleGrouping("spout");	        
+	        builder.setBolt("matchingBolt", districtMacthingBolt,5).shuffleGrouping("spout");	        
 	       // builder.setBolt("countBolt",countBolt,6).shuffleGrouping("matchingBolt"); 
-	        builder.setBolt("countBolt",countBolt,8).fieldsGrouping("matchingBolt",new Fields("districtID")); 
-	       //builder.setBolt("dbBolt",dbWriterBolt,2).shuffleGrouping("countBolt");
+	        builder.setBolt("countBolt3",countBolt3,5).fieldsGrouping("matchingBolt",new Fields("districtID")); 
+	        builder.setBolt("countBolt2",countBolt2,5).fieldsGrouping("matchingBolt",new Fields("districtID")); 
+	        //builder.setBolt("dbBolt",dbWriterBolt,2).shuffleGrouping("countBolt");
 		    Config conf = new Config();
 
             if(args.length==0){

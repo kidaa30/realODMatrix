@@ -8,6 +8,8 @@
  */
 package main.java.realODMatrix.bolt;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -65,7 +67,7 @@ public class DistrictMatchingBolt implements IRichBolt {
 		
 	}
 
-	
+	int cnt=0;
 	@Override
 	public void execute(Tuple input) {
 		// TODO Auto-generated method stub
