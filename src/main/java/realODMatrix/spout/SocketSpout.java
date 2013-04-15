@@ -124,12 +124,19 @@ public class SocketSpout implements IRichSpout {
 					}catch ( Exception e){
 						System.out.println("connection reset, reconnecting ...");
 						sock.close();
-						Thread.sleep(100);
-						sock=new Socket("172.20.14.204",15025);						
+						Thread.sleep(1000);
+		    			sock=new Socket("210.75.252.138",5557);	
+		    			  output = sock.getOutputStream();	
+		    			  output.write(encryptText.getBytes());
+		    			  output.flush();					
 					}
 
 				}else{
-					sock=new Socket("172.20.14.204",15025);	
+	    			sock=new Socket("210.75.252.138",5557);	
+	    			  output = sock.getOutputStream();	
+	    			  output.write(encryptText.getBytes());
+	    			  output.flush();
+					
 					break ;
 				}
     			int len=SocketJava.bytesToShort(b3, 1);

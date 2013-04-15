@@ -219,7 +219,7 @@ public class CountBolt3 implements IRichBolt {
 			
 			 cur_dir=cur_dir+"/"+"vehicleList";
 			 newFolder(cur_dir);
-			 String vehicleList=cur_dir+"/"+sdf2.format(nowDate);
+			 String vehicleList=cur_dir+"/"+sdf4.format(nowDate);
 			 //String nowTime=sdf2.format(nowDate);
 			    
 			LinkedList<District> d=new  LinkedList<District> (districts);

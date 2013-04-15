@@ -28,13 +28,15 @@ import java.util.List;
 
 import java.util.Timer;
 import java.util.Map.Entry;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.collections.map.StaticBucketMap;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.HBaseConfiguration;
 
-import main.java.realODMatrix.bolt.ToHbase;
+//import storm.realTraffic.bolt.MySqlClass;
+//import storm.realTraffic.bolt.SpeedCalculatorBolt2;
+//import storm.realTraffic.bolt.SpeedCalculatorBolt2.Road;
+
 
 /**
  * realODMatrix realODMatrix.bolt CountBolt.java
@@ -64,12 +66,15 @@ public class CountBolt2 implements IRichBolt {
 	public  LinkedList<District>  districts = new  LinkedList<District>();
 	//static public List<String> vehicleIdsInThisArea=new ArrayList<String>(); 
 	Integer cnt;
-	Timer timer;
+	public Timer timer;
 	static Configuration conf=null ;
 	static HBaseHelper helper=null;
-	public Map<String,String> lastDrictMap=new HashMap<String, String>();  //DistrictID, vID
-	public Map<String,Integer> countMap=new HashMap<String, Integer>();
-	public Map<String,Integer> matrix=new HashMap<String, Integer>();
+	public   Map<String,String> lastDrictMap=new HashMap<String, String>();  //DistrictID, vID
+	public   Map<String,Integer> countMap=new ConcurrentHashMap<String, Integer>();
+	//public Map<String,Integer> matrix=new HashMap<String, Integer>();
+	MySqlClass mysql=null; 
+	//public Map<String, Integer> countmap2=new ConcurrentHashMap<String, Integer>();
+
 	
 	public class District 
 	{
@@ -179,62 +184,49 @@ public class CountBolt2 implements IRichBolt {
 		if (!countMap.containsKey(districtID)) { //小区的第一辆车
 			Integer count=new Integer(1);
 			countMap.put(districtID, count);
-			if(!lastDrictMap.containsKey(viechId)){ //该车第一次出现
-				lastDrictMap.put(viechId, districtID);
-			}else{
+			if(lastDrictMap.containsKey(viechId)){
 				String lastDistrID=lastDrictMap.get(viechId);
-				if(lastDistrID.equals(districtID)){
-					return;
-				}else{
+				if(!lastDistrID.equals(districtID)){							
 					Integer lastCount=countMap.get(lastDistrID)	;
 					lastCount=lastCount-1;
-					countMap.put(lastDistrID, lastCount);
-
-					String key=lastDistrID+"-"+districtID;
-					if(!matrix.containsKey(key)){
-						Integer mCount=1;
-						matrix.put(key, mCount);					
-					}else{
-						Integer mCount=matrix.get(key);
-						mCount=mCount+1;
-						matrix.put(key, mCount);	
-					}
-				}
-			}			
+					countMap.put(lastDistrID, lastCount);					
+				}				
+			}
+			lastDrictMap.put(viechId, districtID);		
 		}else{
-			if(!lastDrictMap.containsKey(viechId)){  //该小区存在，但是该车第一次出现
-				lastDrictMap.put(viechId, districtID);
-
-				Integer currentCnt=countMap.get(districtID);
+			Integer currentCnt=countMap.get(districtID);
+			
+			if(!lastDrictMap.containsKey(viechId)){  //该小区存在，但是该车第一次出现				
 				currentCnt=currentCnt+1;
 				countMap.put(districtID, currentCnt);
-
 			}else{
-				String lastDistrID=lastDrictMap.get(viechId);
-				if(lastDistrID.equals(districtID)){
-					return;
-				}else{
+				String lastDistrID=lastDrictMap.get(viechId);				
+				if(!lastDistrID.equals(districtID)){
 					Integer lastCount=countMap.get(lastDistrID)	;
 					lastCount=lastCount-1;
-					countMap.put(lastDistrID, lastCount);
-
-					Integer currentCnt=countMap.get(districtID);
+					countMap.put(lastDistrID, lastCount);					
 					currentCnt=currentCnt+1;
-					countMap.put(districtID, currentCnt);
-					lastDrictMap.put(viechId, districtID);
-
-					String key=lastDistrID+"-"+districtID;
-					if(!matrix.containsKey(key)){
-						Integer mCount=1;
-						matrix.put(key, mCount);					
-					}else{
-						Integer mCount=matrix.get(key);
-						mCount=mCount+1;
-						matrix.put(key, mCount);	
-					}
-				}
+					countMap.put(districtID, currentCnt);					
+				}				
 			}
-		
+			
+			lastDrictMap.put(viechId, districtID);
+		}
+			if(mysql==null) mysql=new MySqlClass("172.20.36.247","3306","realOD", "ghchen", "ghchen");
+						
+/*			Job= new TimerTask() {		
+				@Override
+				public void run() {
+					 synchronized(this) { 
+							mysql.query("delete from realOD.count");
+							CountBolt2.writeToMysql(mysql, countMap);
+
+				}
+				}
+			};
+			timer=new Timer(true);
+			timer.schedule(Job,5000, 30000);  //every 10 seconds.
+*/		
 		Date nowDate=new Date();
 		SimpleDateFormat sdf2= new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
 		SimpleDateFormat sdf3= new SimpleDateFormat("yyyy-MM-dd");
@@ -244,123 +236,36 @@ public class CountBolt2 implements IRichBolt {
 		
 		String cur_dir=System.getProperty("user.dir");
 		 cur_dir=cur_dir+"/"+sdf3.format(nowDate);
-		 newFolder(cur_dir);	
+		 newFolder(cur_dir);	 
 
-		 
-		if(min==0 && second==0){
-			 cur_dir=cur_dir+"/"+"ODvector";
-			 newFolder(cur_dir);
-			 String matrixDir=cur_dir+"/"+sdf4.format(nowDate);
-			try {
-				CountBolt2.writeToFile(matrixDir,matrix);
-				matrix.clear();
-				Thread.sleep(1000);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			
-		}
-				 
-		/* TimerTask writeCnt=new TimerTask() {			
-			@Override
-			public void run() {					
-				CountBolt2.writeToFile(cur_dir,countMap);
-				countMap.clear();
-			}
-		};
+
 		
-		 TimerTask writeMatrix=new TimerTask() {			
-			@Override
-			public void run() {					
-				CountBolt2.writeToFile(cur_dir,countMap);
-				countMap.clear();
-			}
-		};
-		
-		
-		 Timer timer = new Timer(); 
-		  timer.schedule(writeCnt, 10000, 10000);  
-		  timer.schedule(writeMatrix, 1800*1000, 3600*1000);  */
-		
-		else if(second%10==0){
+		/*else*/ if(second%20==0){
 			String nowTime=sdf2.format(nowDate);
 			cur_dir=cur_dir+"/"+"count";
 			 newFolder(cur_dir);
 			 cur_dir=cur_dir+"/"+nowTime;
-			 
+			 //if(mysql==null) mysql=new MySqlClass("172.20.36.247","3306","realOD", "ghchen", "ghchen");
 			 try {
-			//	CountBolt2.writeToFile(cur_dir,"##"+nowTime+"##"); 
-				CountBolt2.writeToFile(cur_dir,countMap);
-				//countMap.clear();
+			    mysql.query("delete from realOD.count");
+				this.writeToMysql(mysql, countMap);				
+				 
+					
+				CountBolt2.writeToFile(cur_dir,countMap);	
 
+				System.out.println("\n\n\n---------------SIZE of lastDrictMap = "+lastDrictMap.size()+"-------\n\n\n");
+				System.out.println("\n\n\n---------------SIZE of  countMap    = "+countMap.size()+"-------\n\n\n");
 				Thread.sleep(1000);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		}
-		/*if( (min%2) ==0 && (second==0) ){
-			String nowTime=sdf2.format(nowDate);
+			 
 
-			    
-			LinkedList<District> d=new  LinkedList<District> (districts);
-			districts.clear();
 			 
-			 String cur_dir=System.getProperty("user.dir");
-			 cur_dir=cur_dir+"/"+sdf3.format(nowDate);
-			 newFolder(cur_dir);
-			 
-			 cur_dir=cur_dir+"/"+"vehicleList-"+nowTime;
-			 CountBolt2.writeToFile(cur_dir,d);
-			 d.clear();
-			 try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}*/
-/*		try {
-			
-			if(helper==null){
-					conf = HBaseConfiguration.create() ;
-					helper= HBaseHelper.getHelper(conf);
-					//ToHbase.writeToHbase(helper,"realOD2Hbase", nowTime, d);
-			 }else{
-			   ToHbase.writeToHbase(helper,"realOD2Hbase", nowTime, d);
-			 }
-			Thread.sleep(1000);
-			
-			d.clear();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			*/
 		}
 		
-//		timer=new Timer(true);
-//		TimerTask Job= new TimerTask() {		
-//			@Override
-//			public void run() {
-//				SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
-//				String nowtime=sdf.format(new Date());
-//				CountBolt.writeToFile("vehicleList-"+nowtime,districts);
-//			}
-//		};
-//		timer.schedule(Job,0, 60*1000);  //every 600 seconds.
-
-		
+	
 		_collector.ack(input);
 	
 	}
@@ -433,8 +338,6 @@ public class CountBolt2 implements IRichBolt {
     	}		
     }
     private static void writeToFile(String fileName,Map<String, Integer>  content) throws IOException{
-
-
     	String[] name=fileName.split("/");
     	String tmp=null;
     	if(name[name.length-1].length()>13) {tmp=fileName.substring(0, fileName.length()-6);
@@ -449,14 +352,29 @@ public class CountBolt2 implements IRichBolt {
 		}
     	
     }
-    	
+    
+    
+	
     private static void writeToFile(String fileName, String text) throws IOException{
     	BufferedWriter br = new BufferedWriter(new FileWriter(fileName,true));
     	br.write(text);
     	br.flush();
     }
     	
+    public synchronized void writeToMysql(MySqlClass mysql,Map<String,Integer> countMap){
+       	SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    	String nowtime=sdf.format(new Date());
+    	for(Entry<String, Integer> entry : countMap.entrySet()){
+    		int rs = mysql.query("insert into realOD.count(time,districtID,count) values('"+nowtime
+    				+"','"+entry.getKey()+"',"+entry.getValue()+" );");   
+    		//("insert into realOD.count(time,districtID,count) values('2013-04-09 12:00:59',10101,99 );")
+    		if(rs!=0) System.out.println("Insert into Mysql success :   "+entry.getKey()+"',"+entry.getValue());
+    	} 
 
+    }
+    
+  
+	
     public static void newFolder(String folderPath) { 
     	try { 
     		String filePath = folderPath.toString(); 

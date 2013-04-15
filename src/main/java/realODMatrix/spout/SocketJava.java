@@ -8,6 +8,7 @@
 package main.java.realODMatrix.spout;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.text.DecimalFormat;
@@ -47,7 +48,8 @@ public class SocketJava {
 	static  String out=new String();
 	static int failedCount=0;
 	static int unknownCount=0;
-
+	static OutputStream output = null;
+	static String encryptText="siatxdata\r\ngps\r\n";
 
 	
 
@@ -57,7 +59,10 @@ public class SocketJava {
 
 		try {
 			if(sock==null)
-			sock=new Socket("172.20.14.204",15025);
+			sock=new Socket("210.75.252.138",5557);
+			  output = sock.getOutputStream();	
+			  output.write(encryptText.getBytes());
+			  output.flush();
 
 			System.out.println("#---------连接成功，数据接收中.........\n");
 			System.out.println("#    .为一条位置信息\n");
@@ -77,11 +82,15 @@ public class SocketJava {
 						System.out.println("connection reset, reconnecting ...");
 						sock.close();
 						Thread.sleep(100);
-						sock=new Socket("172.20.14.204",15025);						
+						sock=new Socket("210.75.252.138",5557);
+						  output = sock.getOutputStream();	
+						  output.write(encryptText.getBytes());
+						  output.flush();
+
 					}
 
 				}else{
-					sock=new Socket("172.20.14.204",15025);	
+					sock=new Socket("210.75.252.138",5557);	
 					break ;
 				}			
 

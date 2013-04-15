@@ -37,52 +37,48 @@ import main.java.realODMatrix.bolt.DistrictMatchingBolt;
 public class realODMatrixTopology  {
 
 	public static void main(String[] args) throws AlreadyAliveException, 
-													InvalidTopologyException, 
-													InterruptedException {
-		// TODO Auto-generated method stub
-		
-		FieldListenerSpout fieldListenerSpout = new FieldListenerSpout();
+	InvalidTopologyException, 
+	InterruptedException {
+		//FieldListenerSpout fieldListenerSpout = new FieldListenerSpout();
 		SocketSpout socketSpout=new SocketSpout();
 		DistrictMatchingBolt districtMacthingBolt=new DistrictMatchingBolt(); 
 		CountBolt3 countBolt3 =new CountBolt3();
 		CountBolt2 countBolt2 =new CountBolt2();
-//		DBWritterBolt dbWriterBolt = new DBWritterBolt();	
-		
-	        
-	        TopologyBuilder builder = new TopologyBuilder();
-	        
-	        //builder.setSpout("spout", fieldListenerSpout,1);	 
-	        builder.setSpout("spout", socketSpout,1);	 
-	        builder.setBolt("matchingBolt", districtMacthingBolt,5).shuffleGrouping("spout");	        
-	       // builder.setBolt("countBolt",countBolt,6).shuffleGrouping("matchingBolt"); 
-	        builder.setBolt("countBolt3",countBolt3,5).fieldsGrouping("matchingBolt",new Fields("districtID")); 
-	        builder.setBolt("countBolt2",countBolt2,5).fieldsGrouping("matchingBolt",new Fields("districtID")); 
-	        //builder.setBolt("dbBolt",dbWriterBolt,2).shuffleGrouping("countBolt");
-		    Config conf = new Config();
+		//CountBolt2Rev1 countBolt2=new CountBolt2Rev1 ();		
 
-            if(args.length==0){
-		    	args=new String[1];
-		    	args[0]="realOD";
-            }	
-		    
-	        if(args!=null && args.length > 0) {
-	            conf.setNumWorkers(16);            
+		TopologyBuilder builder = new TopologyBuilder();
 
-	            //LocalCluster  cluster= new LocalCluster();
-	            //cluster.submitTopology(args[0], conf, builder.createTopology());
-	            StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
-	        } 
-	        else {     
-	              
-	              conf.setDebug(true);
-	              conf.setMaxTaskParallelism(16);
-	              LocalCluster cluster = new LocalCluster();
-	              cluster.submitTopology("realOD", conf, builder.createTopology());
-	    	      Thread.sleep(3000);
-	    	      cluster.shutdown(); 
-	        }
+		//builder.setSpout("spout", fieldListenerSpout,1);	 
+		builder.setSpout("spout", socketSpout,1);	 
+		builder.setBolt("matchingBolt", districtMacthingBolt,1).shuffleGrouping("spout");	        
+		builder.setBolt("countBolt3",countBolt3,1).fieldsGrouping("matchingBolt",new Fields("districtID")); 
+		builder.setBolt("countBolt2",countBolt2,1).fieldsGrouping("matchingBolt",new Fields("districtID")); 
 
-	    }
+		Config conf = new Config();
+
+		if(args.length==0){
+			args=new String[1];
+			args[0]="realOD";
+		}	
+
+		if(args!=null && args.length > 0) {
+			conf.setNumWorkers(16);            
+
+			//LocalCluster  cluster= new LocalCluster();
+			//cluster.submitTopology(args[0], conf, builder.createTopology());
+			StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
+		} 
+		else {     
+
+			conf.setDebug(true);
+			conf.setMaxTaskParallelism(16);
+			LocalCluster cluster = new LocalCluster();
+			cluster.submitTopology("realOD", conf, builder.createTopology());
+			Thread.sleep(3000);
+			cluster.shutdown(); 
+		}
+
+	}
 
 }
 
