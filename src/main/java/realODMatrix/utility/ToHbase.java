@@ -5,7 +5,7 @@
  * Created:2013-1-29 下午4:30:55
  * email: gh.chen@siat.ac.cn
  */
-package main.java.realODMatrix.bolt;
+package main.java.realODMatrix.utility;
 
 import java.io.BufferedReader;
 import java.io.File;

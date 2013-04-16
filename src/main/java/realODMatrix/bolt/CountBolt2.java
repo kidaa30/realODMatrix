@@ -68,7 +68,7 @@ public class CountBolt2 implements IRichBolt {
 	Integer cnt;
 	public Timer timer;
 	static Configuration conf=null ;
-	static HBaseHelper helper=null;
+	//static HBaseHelper helper=null;
 	public   Map<String,String> lastDrictMap=new HashMap<String, String>();  //DistrictID, vID
 	public   Map<String,Integer> countMap=new ConcurrentHashMap<String, Integer>();
 	//public Map<String,Integer> matrix=new HashMap<String, Integer>();

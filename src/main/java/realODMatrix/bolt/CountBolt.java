@@ -32,7 +32,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 
-import main.java.realODMatrix.bolt.ToHbase;
+import main.java.realODMatrix.utility.HBaseHelper;
+import main.java.realODMatrix.utility.ToHbase;
 
 /**
  * realODMatrix realODMatrix.bolt CountBolt.java

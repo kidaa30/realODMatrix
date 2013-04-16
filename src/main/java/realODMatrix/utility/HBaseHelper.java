@@ -1,4 +1,4 @@
-package  main.java.realODMatrix.bolt;
+package  main.java.realODMatrix.utility;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HColumnDescriptor;
